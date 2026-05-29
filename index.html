@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Street League ⚽</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
@@ -22,14 +22,16 @@ html,body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;
 body{overflow-x:hidden}
 #root{min-height:100vh;display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative}
-@media(min-width:768px){.app{max-width:900px}}
+.app{display:flex;flex-direction:column;min-height:100vh;width:100%;max-width:600px;margin:0 auto;position:relative}
+@media(min-width:640px){.app{max-width:720px}}
+@media(min-width:1024px){.app{max-width:860px}}
 .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
 .header-logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:900;background:linear-gradient(135deg,var(--green),var(--neon));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .header-back{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);cursor:pointer;font-size:13px;font-family:'Heebo',sans-serif;transition:all 0.2s}
 .header-back:hover{border-color:var(--green);color:var(--green)}
-.bottom-nav{background:var(--bg2);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;right:0;left:0;max-width:480px;margin:0 auto;z-index:100}
-@media(min-width:768px){.bottom-nav{max-width:900px}}
+.bottom-nav{background:var(--bg2);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;right:0;left:0;max-width:600px;margin:0 auto;z-index:100}
+@media(min-width:640px){.bottom-nav{max-width:720px}}
+@media(min-width:1024px){.bottom-nav{max-width:860px}}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 14px;cursor:pointer;transition:all 0.2s;font-size:10px;color:var(--text3);gap:4px;border-top:2px solid transparent}
 .nav-item.active{color:var(--green);border-top-color:var(--green)}
 .nav-icon{font-size:20px}
@@ -167,7 +169,7 @@ tr:hover td{background:var(--card2)}
 .loading-text{font-size:14px;color:var(--text2)}
 .rating-history-item{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .rh-change.pos{color:var(--green)}.rh-change.neg{color:var(--red)}.rh-change.neu{color:var(--text3)}
-
+ 
 /* Login */
 .login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
 .login-screen::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(0,230,118,0.07),transparent 70%);top:-80px;right:-80px;pointer-events:none}
@@ -188,19 +190,19 @@ tr:hover td{background:var(--card2)}
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useCallback, useMemo, useRef } = React;
-
+ 
 /* ─── SUPABASE ─── */
 const SUPABASE_URL = 'https://eapelkekvmdbefeabmbl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGVsa2Vrdm1kYmVmZWFibWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNjI1NjYsImV4cCI6MjA5NTYzODU2Nn0.-bu9RMrtO7_iSBgYaw-k_QYywc2m_h6of2gBERUpuVo';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+ 
 /* ─── CONSTANTS ─── */
 const POSITIONS = { GK:'שוער', DEF:'הגנה', MID:'קישור', FWD:'התקפה', ANY:'כלבו' };
 const FEET = { right:'ימין', left:'שמאל', both:'שתיהן' };
 const SKILLS_DEF = ['pace','shooting','passing','dribbling','defending','physical','vision','finishing'];
 const SKILL_LABELS = { pace:'מהירות', shooting:'בעיטה', passing:'מסירה', dribbling:'דריבל', defending:'הגנה', physical:'פיזיות', vision:'ראייה', finishing:'סיומת' };
 const POS_COLORS = { GK:'#ffd700', DEF:'#00bcd4', MID:'#00e676', FWD:'#ff5252', ANY:'#b39ddb' };
-
+ 
 /* ─── LEAGUE API ─── */
 const hashPin = (pin) => {
   let h = 0;
@@ -208,7 +210,7 @@ const hashPin = (pin) => {
   return (h>>>0).toString(36);
 };
 const slugify = (name) => name.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^\wא-ת]/g,'');
-
+ 
 const apiGetLeagues = async () => {
   const { data } = await sb.from('leagues').select('*').order('created_at');
   return data || [];
@@ -225,7 +227,7 @@ const apiVerifyLeague = async (slug, pin) => {
   if (data.pin_hash !== hashPin(pin)) return { error: 'קוד שגוי' };
   return { ok: true, league: data };
 };
-
+ 
 /* ─── DATA API ─── */
 const apiGetPlayers = async (lid) => {
   const { data } = await sb.from('players').select('*').eq('league_id', lid).order('rating', {ascending:false});
@@ -243,13 +245,13 @@ const apiGetRatingHistory = async (lid) => {
   const { data } = await sb.from('rating_history').select('*').eq('league_id', lid).order('date', {ascending:false});
   return data || [];
 };
-
+ 
 /* ─── SESSION ─── */
 const SESSION_KEY = '__sl_session__';
 const getSession = () => { try { const v=sessionStorage.getItem(SESSION_KEY); return v?JSON.parse(v):null; } catch { return null; } };
 const setSession = (l) => { try { sessionStorage.setItem(SESSION_KEY,JSON.stringify(l)); } catch {} };
 const clearSession = () => { try { sessionStorage.removeItem(SESSION_KEY); } catch {} };
-
+ 
 /* ─── UTILS ─── */
 const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
@@ -259,7 +261,12 @@ const avatarColor = name => {
   let h=0; for(let c of (name||'')) h=(h*31+c.charCodeAt(0))%colors.length; return colors[h];
 };
 const formatDate = ts => new Date(ts).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'2-digit'});
-
+ 
+/* ─── TEAM CONSTANTS ─── */
+const TEAM_COLORS=['#00e676','#64ffda','#ff9100','#b39ddb'];
+const TEAM_NAMES_HE=['א׳','ב׳','ג׳','ד׳'];
+const TEAM_ICONS=['⚡','🌊','🔥','💫'];
+ 
 /* ─── RATING ENGINE ─── */
 function computeRatingChanges(teamAPlayers, teamBPlayers, teamAScore, teamBScore, goalMap) {
   const avgA = avg(teamAPlayers.map(p=>p.rating));
@@ -282,26 +289,68 @@ function computeRatingChanges(teamAPlayers, teamBPlayers, teamAScore, teamBScore
   process(teamBPlayers, teamBScore, teamAScore, avgB, avgA);
   return changes;
 }
-
-/* ─── TEAM BALANCER ─── */
-function balanceTeams(players, attempt=0) {
-  if (players.length < 2) return { teamA:players, teamB:[], bench:null };
-  const sorted = [...players].sort((a,b)=>b.rating-a.rating);
-  const hasBench = sorted.length%2!==0;
-  const bench = hasBench ? sorted.pop() : null;
-  let teamA=[], teamB=[];
-  if (attempt===0) { sorted.forEach((p,i)=>(i%2===0?teamA:teamB).push(p)); }
-  else {
+ 
+/* ─── TEAM BALANCER (N teams) ─── */
+function balanceTeams(players, numTeams=2, attempt=0, useRaw=false) {
+  if (players.length < numTeams) return { teams:[players,...Array(numTeams-1).fill([])], bench:[] };
+  const ratingOf=p=>useRaw&&p.raw_rating?(p.raw_rating*200):p.rating;
+  const sorted=[...players].sort((a,b)=>ratingOf(b)-ratingOf(a));
+  const benchCount=sorted.length%numTeams;
+  const bench=benchCount>0 ? sorted.splice(sorted.length-benchCount) : [];
+  const teams=Array.from({length:numTeams},()=>[]);
+  if(attempt===0){
+    // Snake draft
+    sorted.forEach((p,i)=>{
+      const round=Math.floor(i/numTeams);
+      const idx=round%2===0 ? i%numTeams : numTeams-1-(i%numTeams);
+      teams[idx].push(p);
+    });
+  } else {
     const sh=[...sorted];
     for(let i=sh.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[sh[i],sh[j]]=[sh[j],sh[i]];}
-    sh.forEach((p,i)=>(i%2===0?teamA:teamB).push(p));
+    sh.forEach((p,i)=>teams[i%numTeams].push(p));
   }
-  const gksA=teamA.filter(p=>p.preferred_position==='GK');
-  const gksB=teamB.filter(p=>p.preferred_position==='GK');
-  if(gksA.length>1&&gksB.length===0){const e=gksA[1];teamA=teamA.filter(p=>p.id!==e.id);teamB.push(e);}
-  return { teamA, teamB, bench };
+  // Distribute GKs evenly
+  const gksByTeam=teams.map(t=>t.filter(p=>p.preferred_position==='GK'));
+  gksByTeam.forEach((gks,ti)=>{
+    if(gks.length>1){
+      gks.slice(1).forEach(gk=>{
+        const targetTeam=teams.reduce((best,t,i)=>i!==ti&&gksByTeam[i].length<gksByTeam[best].length?i:best,0);
+        teams[ti]=teams[ti].filter(p=>p.id!==gk.id);
+        teams[targetTeam].push(gk);
+      });
+    }
+  });
+  return { teams, bench };
 }
-
+ 
+/* ─── RATING ENGINE (N teams) ─── */
+function computeRatingChangesMulti(teamPlayers, scores, goalMap) {
+  const maxScore=Math.max(...scores);
+  const winners=scores.filter(s=>s===maxScore).length;
+  const isAllTied=winners===scores.length;
+  const changes=[];
+  teamPlayers.forEach((players,ti)=>{
+    const myScore=scores[ti];
+    const won=!isAllTied && myScore===maxScore;
+    const drew=isAllTied || (!won && scores.filter(s=>s===myScore).length>0 && myScore===maxScore);
+    const tied=isAllTied;
+    const lost=!won&&!tied;
+    const base=won?20:tied?5:-15;
+    const avgMine=avg(players.map(p=>p.rating));
+    const avgOthers=avg(teamPlayers.filter((_,i)=>i!==ti).flat().map(p=>p.rating));
+    const bonus=won&&avgOthers>avgMine?Math.min(15,Math.round((avgOthers-avgMine)/20)*5+5):0;
+    players.forEach(p=>{
+      const goals=goalMap[p.id]||0;
+      const change=base+bonus+goals*3;
+      const after=Math.max(100,p.rating+change);
+      changes.push({player_id:p.id,rating_before:p.rating,rating_change:after-p.rating,rating_after:after,
+        reason:won?'ניצחון':tied?'תיקו':'הפסד',goals,bonus,teamIndex:ti});
+    });
+  });
+  return changes;
+}
+ 
 /* ─── SKILL RADAR ─── */
 function SkillRadar({ skills, size=200 }) {
   const n=SKILLS_DEF.length, cx=size/2, cy=size/2, r=size*0.36, labelR=size*0.46;
@@ -319,7 +368,7 @@ function SkillRadar({ skills, size=200 }) {
     </svg>
   );
 }
-
+ 
 /* ─── AVATAR ─── */
 function Avatar({ player, size='md' }) {
   const bg=`linear-gradient(135deg,${avatarColor(player.name)}44,${avatarColor(player.name)}22)`;
@@ -327,13 +376,13 @@ function Avatar({ player, size='md' }) {
   if (player.photo) return <img src={player.photo} className={`avatar-${size}`} style={{objectFit:'cover',border}} alt={player.name}/>;
   return <div className={`avatar-${size}`} style={{background:bg,border,color:avatarColor(player.name)}}>{initials(player.name)}</div>;
 }
-
+ 
 /* ─── TOAST ─── */
 function Toast({ msg, type='success', onDone }) {
   useEffect(()=>{const t=setTimeout(onDone,3500);return()=>clearTimeout(t);},[]);
   return <div className={`toast ${type}`}><span>{{success:'✅',error:'❌',warn:'⚠️'}[type]}</span>{msg}</div>;
 }
-
+ 
 /* ─── CONFIRM MODAL ─── */
 function ConfirmModal({ title, msg, onConfirm, onCancel }) {
   return (
@@ -349,7 +398,7 @@ function ConfirmModal({ title, msg, onConfirm, onCancel }) {
     </div>
   );
 }
-
+ 
 /* ─── LOGIN SCREEN ─── */
 function LoginScreen({ onLogin }) {
   const [mode, setMode] = useState('choose');
@@ -360,11 +409,11 @@ function LoginScreen({ onLogin }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const pinRefs = [useRef(),useRef(),useRef(),useRef()];
-
+ 
   useEffect(()=>{
     apiGetLeagues().then(ls=>{ setLeagues(ls); setLlLoading(false); });
   },[]);
-
+ 
   const handlePinChange=(i,v)=>{
     const d=v.replace(/\D/,'').slice(-1);
     const next=[...pin]; next[i]=d; setPin(next);
@@ -374,7 +423,7 @@ function LoginScreen({ onLogin }) {
   const pinFull=pin.every(d=>d!=='');
   const pinStr=pin.join('');
   const resetPin=()=>setPin(['','','','']);
-
+ 
   const doCreate=async()=>{
     if(!name.trim()){setError('הזן שם קבוצה');return;}
     if(!pinFull){setError('הזן קוד 4 ספרות');return;}
@@ -384,7 +433,7 @@ function LoginScreen({ onLogin }) {
     const vr=await apiVerifyLeague(res.slug,pinStr);
     setSession(vr.league); onLogin(vr.league);
   };
-
+ 
   const doLogin=async()=>{
     if(!name.trim()){setError('הזן שם קבוצה');return;}
     if(!pinFull){setError('הזן קוד');return;}
@@ -393,9 +442,9 @@ function LoginScreen({ onLogin }) {
     if(res.error){setError(res.error);setBusy(false);return;}
     setSession(res.league); onLogin(res.league);
   };
-
+ 
   const quickLogin=(league)=>{ setName(league.name); setMode('login'); setError(''); resetPin(); setTimeout(()=>pinRefs[0].current?.focus(),100); };
-
+ 
   if (mode==='choose') return (
     <div className="login-screen">
       <div className="login-card">
@@ -425,7 +474,7 @@ function LoginScreen({ onLogin }) {
       </div>
     </div>
   );
-
+ 
   const isCreate=mode==='create';
   return (
     <div className="login-screen">
@@ -458,7 +507,7 @@ function LoginScreen({ onLogin }) {
     </div>
   );
 }
-
+ 
 /* ─── DASHBOARD ─── */
 function Dashboard({ players, matches, onNav }) {
   const topRated=useMemo(()=>[...players].sort((a,b)=>b.rating-a.rating)[0],[players]);
@@ -504,7 +553,7 @@ function Dashboard({ players, matches, onNav }) {
     </div>
   );
 }
-
+ 
 /* ─── PLAYERS LIST ─── */
 function Players({ players, onNav, onDelete }) {
   const [search,setSearch]=useState('');
@@ -532,6 +581,7 @@ function Players({ players, onNav, onDelete }) {
             <div style={{textAlign:'center'}}>
               <div className="player-rating">{p.rating}</div>
               <div className="player-rating-label">דירוג</div>
+              {p.raw_rating>0&&<div style={{fontSize:11,color:'var(--gold)',marginTop:2,letterSpacing:1}}>{'★'.repeat(p.raw_rating)}</div>}
             </div>
           </div>
           <div className="player-card-stats">
@@ -550,12 +600,12 @@ function Players({ players, onNav, onDelete }) {
     </div>
   );
 }
-
+ 
 /* ─── PLAYER FORM ─── */
 function PlayerForm({ player:initial, onSave, onBack }) {
   const isEdit=!!initial;
   const defSkills=SKILLS_DEF.reduce((a,k)=>({...a,[k]:50}),{});
-  const [form,setForm]=useState({name:initial?.name||'',photo:initial?.photo||'',preferred_position:initial?.preferred_position||'MID',strong_foot:initial?.strong_foot||'right',rating:initial?.rating||'',manualRating:!!(initial?.rating&&initial?.rating!==1000),skills:{...defSkills,...(initial?.skills||{})}});
+  const [form,setForm]=useState({name:initial?.name||'',photo:initial?.photo||'',preferred_position:initial?.preferred_position||'MID',strong_foot:initial?.strong_foot||'right',rating:initial?.rating||'',manualRating:!!(initial?.rating&&initial?.rating!==1000),raw_rating:initial?.raw_rating||0,skills:{...defSkills,...(initial?.skills||{})}});
   const [errors,setErrors]=useState({});
   const calcRating=useMemo(()=>Math.round(avg(SKILLS_DEF.map(k=>form.skills[k]))*10),[form.skills]);
   const displayRating=form.manualRating&&form.rating?parseInt(form.rating):calcRating;
@@ -565,7 +615,7 @@ function PlayerForm({ player:initial, onSave, onBack }) {
     if(!form.name.trim()) e.name='שם חובה';
     if(form.manualRating&&form.rating&&(isNaN(form.rating)||form.rating<100||form.rating>9999)) e.rating='דירוג לא תקין';
     if(Object.keys(e).length){setErrors(e);return;}
-    onSave({name:form.name.trim(),photo:form.photo,preferred_position:form.preferred_position,strong_foot:form.strong_foot,rating:form.manualRating&&form.rating?parseInt(form.rating):calcRating,skills:form.skills});
+    onSave({name:form.name.trim(),photo:form.photo,preferred_position:form.preferred_position,strong_foot:form.strong_foot,rating:form.manualRating&&form.rating?parseInt(form.rating):calcRating,raw_rating:form.raw_rating||0,skills:form.skills});
   };
   return (
     <div className="page fade-in">
@@ -605,6 +655,21 @@ function PlayerForm({ player:initial, onSave, onBack }) {
         {form.manualRating&&<><input className="form-input" type="number" value={form.rating} onChange={e=>setForm(f=>({...f,rating:e.target.value}))} placeholder="1000"/>{errors.rating&&<div className="form-error">{errors.rating}</div>}</>}
         {!form.manualRating&&<div style={{fontSize:12,color:'var(--text3)'}}>מחושב אוטומטית מממוצע הסקילים × 10</div>}
       </div>
+      <div className="card mb-16" style={{borderColor:'var(--gold)33'}}>
+        <div className="flex items-center justify-between mb-8">
+          <div className="section-title" style={{margin:0}}>דירוג בתכל׳ס</div>
+          <div style={{fontSize:11,color:'var(--text3)'}}>לחלוקת קבוצות</div>
+        </div>
+        <div style={{display:'flex',gap:6,justifyContent:'center',marginBottom:4}}>
+          {[1,2,3,4,5].map(n=>(
+            <button key={n} onClick={()=>setForm(f=>({...f,raw_rating:f.raw_rating===n?0:n}))}
+              style={{fontSize:28,background:'none',border:'none',cursor:'pointer',opacity:form.raw_rating>=n?1:0.25,transition:'all 0.15s',filter:form.raw_rating>=n?'drop-shadow(0 0 6px gold)':'none'}}>
+              {'★'}
+            </button>
+          ))}
+        </div>
+        <div style={{textAlign:'center',fontSize:12,color:'var(--text3)'}}>{form.raw_rating===0?'לא הוגדר':['','חלש','מתחת לממוצע','ממוצע','מעל ממוצע','חזק'][form.raw_rating]}</div>
+      </div>
       <div className="card mb-16">
         <div className="section-title">סקילים</div>
         {SKILLS_DEF.map(k=>(
@@ -625,7 +690,7 @@ function PlayerForm({ player:initial, onSave, onBack }) {
     </div>
   );
 }
-
+ 
 /* ─── PLAYER DETAIL ─── */
 function PlayerDetail({ player, ratingHistory, onNav }) {
   const winRate=player.stats.games?Math.round(player.stats.wins/player.stats.games*100):0;
@@ -646,7 +711,11 @@ function PlayerDetail({ player, ratingHistory, onNav }) {
           </div>
           <div style={{marginRight:'auto',textAlign:'center'}}>
             <div style={{fontSize:44,fontWeight:900,color:'var(--green)',lineHeight:1,textShadow:'0 0 30px rgba(0,230,118,0.5)'}}>{player.rating}</div>
-            <div style={{fontSize:10,color:'var(--text3)',fontWeight:700}}>דירוג</div>
+            <div style={{fontSize:10,color:'var(--text3)',fontWeight:700}}>דירוג מחושב</div>
+            {player.raw_rating>0&&<div style={{marginTop:4}}>
+              <div style={{fontSize:14,color:'var(--gold)',letterSpacing:1}}>{'★'.repeat(player.raw_rating)+'☆'.repeat(5-player.raw_rating)}</div>
+              <div style={{fontSize:10,color:'var(--text3)'}}>בתכל׳ס</div>
+            </div>}
           </div>
         </div>
         <div className="stats-grid">
@@ -688,127 +757,194 @@ function PlayerDetail({ player, ratingHistory, onNav }) {
     </div>
   );
 }
-
+ 
 /* ─── NEW GAME ─── */
 function NewGame({ players, onNext }) {
   const [selected,setSelected]=useState([]);
+  const [numTeams,setNumTeams]=useState(2);
+  const allSelected=selected.length===players.length;
   const toggle=id=>setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
-  const canDivide=selected.length>=2;
+  const toggleAll=()=>setSelected(allSelected?[]:players.map(p=>p.id));
+  const canDivide=selected.length>=numTeams;
   return (
     <div className="page fade-in">
       <div className="page-title">⚡ משחק חדש</div>
-      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 16px',marginBottom:16,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <span style={{fontSize:14,color:'var(--text2)'}}>שחקנים נבחרו:</span>
-        <span style={{fontSize:22,fontWeight:900,color:canDivide?'var(--green)':'var(--text3)'}}>{selected.length}</span>
+      {/* Team count selector */}
+      <div className="card mb-12">
+        <div style={{fontSize:13,fontWeight:700,color:'var(--text2)',marginBottom:10}}>מספר קבוצות</div>
+        <div style={{display:'flex',gap:8}}>
+          {[2,3,4].map(n=>(
+            <button key={n} onClick={()=>setNumTeams(n)}
+              style={{flex:1,padding:'10px 0',borderRadius:10,border:`2px solid ${numTeams===n?TEAM_COLORS[0]:'var(--border)'}`,background:numTeams===n?`${TEAM_COLORS[0]}18`:'var(--bg3)',color:numTeams===n?TEAM_COLORS[0]:'var(--text2)',fontWeight:800,fontSize:16,cursor:'pointer',fontFamily:'Heebo,sans-serif',transition:'all 0.15s'}}>
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Header bar */}
+      <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <button onClick={toggleAll} style={{background:'none',border:'none',color:'var(--green)',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'Heebo,sans-serif'}}>
+          {allSelected?'בטל הכל':'בחר הכל'}
+        </button>
+        <span style={{fontSize:18,fontWeight:900,color:canDivide?'var(--green)':'var(--text3)'}}>{selected.length} נבחרו</span>
       </div>
       {players.map(p=>(
         <div key={p.id} className={`player-select-item ${selected.includes(p.id)?'selected':''}`} onClick={()=>toggle(p.id)}>
           <Avatar player={p} size="sm"/>
-          <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14}}>{p.name}</div><div style={{fontSize:11,color:'var(--text3)'}}>{POSITIONS[p.preferred_position]} • {p.rating}</div></div>
+          <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14}}>{p.name}</div><div style={{fontSize:11,color:'var(--text3)'}}>{POSITIONS[p.preferred_position]} • {p.rating}{p.raw_rating>0?` • ${'★'.repeat(p.raw_rating)}`:''}</div></div>
           <div className="sel-check">{selected.includes(p.id)?'✓':''}</div>
         </div>
       ))}
       <div style={{position:'sticky',bottom:70,paddingTop:12,background:'var(--bg)'}}>
-        <button className="btn btn-primary btn-lg btn-full" disabled={!canDivide} onClick={()=>onNext(selected)}>חלק לקבוצות ({selected.length})</button>
-        {!canDivide&&selected.length>0&&<div style={{textAlign:'center',fontSize:12,color:'var(--text3)',marginTop:8}}>נדרשים לפחות 2 שחקנים</div>}
+        <button className="btn btn-primary btn-lg btn-full" disabled={!canDivide} onClick={()=>onNext(selected,numTeams)}>
+          חלק ל-{numTeams} קבוצות ({selected.length} שחקנים)
+        </button>
+        {!canDivide&&selected.length>0&&<div style={{textAlign:'center',fontSize:12,color:'var(--text3)',marginTop:8}}>נדרשים לפחות {numTeams} שחקנים</div>}
       </div>
     </div>
   );
 }
-
+ 
 /* ─── TEAM SPLIT ─── */
-function TeamSplit({ players, selectedIds, onStart }) {
+function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
   const sel=useMemo(()=>players.filter(p=>selectedIds.includes(p.id)),[players,selectedIds]);
+  const hasRaw=useMemo(()=>sel.some(p=>p.raw_rating>0),[sel]);
+  const [useRaw,setUseRaw]=useState(false);
   const [attempt,setAttempt]=useState(0);
-  const [teams,setTeams]=useState(()=>balanceTeams(sel,0));
-  const reshuffle=()=>{const a=attempt+1;setAttempt(a);setTeams(balanceTeams(sel,a));};
-  const movePlayer=(pid,toTeam)=>{
-    setTeams(prev=>{
-      let{teamA,teamB,bench}=prev;
-      const pA=teamA.find(p=>p.id===pid),pB=teamB.find(p=>p.id===pid);
-      if(toTeam==='A'&&pB){teamB=teamB.filter(p=>p.id!==pid);teamA=[...teamA,pB];}
-      if(toTeam==='B'&&pA){teamA=teamA.filter(p=>p.id!==pid);teamB=[...teamB,pA];}
-      return{teamA,teamB,bench};
+  const [split,setSplit]=useState(()=>balanceTeams(sel,numTeams,0,false));
+  const reshuffle=()=>{const a=attempt+1;setAttempt(a);setSplit(balanceTeams(sel,numTeams,a,useRaw));};
+  const toggleUseRaw=()=>{const nr=!useRaw;setUseRaw(nr);setAttempt(0);setSplit(balanceTeams(sel,numTeams,0,nr));};
+  const movePlayer=(pid,fromIdx,toIdx)=>{
+    setSplit(prev=>{
+      const ts=prev.teams.map(t=>[...t]);
+      const p=ts[fromIdx].find(x=>x.id===pid);
+      if(!p) return prev;
+      ts[fromIdx]=ts[fromIdx].filter(x=>x.id!==pid);
+      ts[toIdx]=[...ts[toIdx],p];
+      return{...prev,teams:ts};
     });
   };
-  const avgR=arr=>arr.length?Math.round(avg(arr.map(p=>p.rating))):0;
-  const sumR=arr=>arr.reduce((a,p)=>a+p.rating,0);
-  const diff=Math.abs(sumR(teams.teamA)-sumR(teams.teamB));
+  const ratingOf=p=>useRaw&&p.raw_rating?(p.raw_rating*200):p.rating;
+  const avgR=arr=>arr.length?Math.round(avg(arr.map(ratingOf))):0;
+  const sumR=arr=>arr.reduce((s,p)=>s+ratingOf(p),0);
+  const totalR=split.teams.reduce((s,t)=>s+sumR(t),0);
+  const maxDiff=useMemo(()=>{
+    const sums=split.teams.map(sumR);
+    return Math.max(...sums)-Math.min(...sums);
+  },[split,useRaw]);
   return (
     <div className="page fade-in">
       <div className="page-title">⚖️ חלוקת קבוצות</div>
-      <div className="card mb-16" style={{borderColor:'var(--green)33',textAlign:'center'}}>
-        <div style={{fontSize:13,color:'var(--text3)'}}>פער בין קבוצות</div>
-        <div style={{fontSize:28,fontWeight:900,color:diff<50?'var(--green)':diff<100?'var(--orange)':'var(--red)'}}>{diff}</div>
-        <div className="diff-bar-wrap">
-          <div style={{fontSize:11,color:'var(--text3)',width:28}}>{Math.round(sumR(teams.teamA)/(sumR(teams.teamA)+sumR(teams.teamB)+0.01)*100)}%</div>
-          <div className="diff-bar-bg"><div className="diff-bar-fill diff-a" style={{width:`${sumR(teams.teamA)/(sumR(teams.teamA)+sumR(teams.teamB)+0.01)*100}%`}}/></div>
+      {hasRaw&&<div style={{display:'flex',gap:8,marginBottom:12}}>
+        <button onClick={()=>!useRaw||toggleUseRaw()} style={{flex:1,padding:'8px 0',borderRadius:10,border:`2px solid ${!useRaw?'var(--green)':'var(--border)'}`,background:!useRaw?'var(--green3)':'var(--bg3)',color:!useRaw?'var(--green)':'var(--text2)',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'Heebo,sans-serif'}}>
+          דירוג מחושב
+        </button>
+        <button onClick={()=>useRaw||toggleUseRaw()} style={{flex:1,padding:'8px 0',borderRadius:10,border:`2px solid ${useRaw?'var(--gold)':'var(--border)'}`,background:useRaw?'rgba(255,215,0,0.1)':'var(--bg3)',color:useRaw?'var(--gold)':'var(--text2)',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'Heebo,sans-serif'}}>
+          דירוג בתכל׳ס ★
+        </button>
+      </div>}
+      <div className="card mb-12" style={{borderColor:'var(--green)33'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+          <div style={{fontSize:13,color:'var(--text3)'}}>פער מקסימלי</div>
+          <div style={{fontSize:22,fontWeight:900,color:maxDiff<50?'var(--green)':maxDiff<100?'var(--orange)':'var(--red)'}}>{maxDiff}</div>
+        </div>
+        <div style={{display:'flex',gap:4,height:8,borderRadius:4,overflow:'hidden'}}>
+          {split.teams.map((t,i)=>(
+            <div key={i} style={{flex:sumR(t)||1,background:TEAM_COLORS[i],borderRadius:4,transition:'flex 0.4s ease'}}/>
+          ))}
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',marginTop:6}}>
+          {split.teams.map((t,i)=>(
+            <div key={i} style={{fontSize:11,color:TEAM_COLORS[i],fontWeight:700}}>{TEAM_ICONS[i]} {avgR(t)}</div>
+          ))}
         </div>
       </div>
-      {[{team:teams.teamA,label:'⚡ קבוצה א׳',color:'var(--green)',side:'B',sideLabel:'→ ב׳'},{team:teams.teamB,label:'🌊 קבוצה ב׳',color:'var(--neon)',side:'A',sideLabel:'← א׳'}].map(({team,label,color,side,sideLabel})=>(
-        <div key={label} className="team-card">
-          <div className="team-header" style={{background:`linear-gradient(90deg,${color}18,transparent)`}}>
-            <div><div className="team-name" style={{color}}>{label}</div>
-            <div className="team-meta">{team.length} שחקנים • ממוצע: {avgR(team)} • סכום: {sumR(team)}</div></div>
+      {split.teams.map((team,ti)=>(
+        <div key={ti} className="team-card">
+          <div className="team-header" style={{background:`linear-gradient(90deg,${TEAM_COLORS[ti]}18,transparent)`}}>
+            <div>
+              <div className="team-name" style={{color:TEAM_COLORS[ti]}}>{TEAM_ICONS[ti]} קבוצה {TEAM_NAMES_HE[ti]}</div>
+              <div className="team-meta">{team.length} שחקנים • ממוצע: {avgR(team)} • סכום: {sumR(team)}</div>
+            </div>
           </div>
           {team.map(p=>(
             <div key={p.id} className="team-player-row">
-              <div className="flex items-center gap-8"><Avatar player={p} size="sm"/><div><div style={{fontWeight:700,fontSize:14}}>{p.name}</div><div style={{fontSize:11,color:'var(--text3)'}}>{POSITIONS[p.preferred_position]} • {p.rating}</div></div></div>
-              <button className="btn btn-ghost btn-sm" onClick={()=>movePlayer(p.id,side)}>{sideLabel}</button>
+              <div className="flex items-center gap-8">
+                <Avatar player={p} size="sm"/>
+                <div><div style={{fontWeight:700,fontSize:14}}>{p.name}</div><div style={{fontSize:11,color:'var(--text3)'}}>{POSITIONS[p.preferred_position]} • {p.rating}{p.raw_rating>0?<span style={{color:'var(--gold)',marginRight:4}}>{'★'.repeat(p.raw_rating)}</span>:''}</div></div>
+              </div>
+              <div style={{display:'flex',gap:4}}>
+                {split.teams.map((_,toIdx)=>toIdx!==ti&&(
+                  <button key={toIdx} className="btn btn-ghost btn-sm" style={{color:TEAM_COLORS[toIdx],borderColor:TEAM_COLORS[toIdx]+'44',padding:'4px 8px'}}
+                    onClick={()=>movePlayer(p.id,ti,toIdx)}>
+                    {TEAM_ICONS[toIdx]}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       ))}
-      {teams.bench&&<div className="card mb-12" style={{borderColor:'var(--orange)44'}}><div style={{color:'var(--orange)',fontWeight:700,marginBottom:8}}>⏱️ ממתין / מחליף</div><div className="flex items-center gap-8"><Avatar player={teams.bench} size="sm"/><div><div style={{fontWeight:700}}>{teams.bench.name}</div></div></div></div>}
+      {split.bench&&split.bench.length>0&&(
+        <div className="card mb-12" style={{borderColor:'var(--orange)44'}}>
+          <div style={{color:'var(--orange)',fontWeight:700,marginBottom:8}}>⏱️ ממתינים / מחליפים</div>
+          {split.bench.map(p=>(
+            <div key={p.id} className="flex items-center gap-8" style={{marginBottom:6}}>
+              <Avatar player={p} size="sm"/>
+              <div style={{fontWeight:700}}>{p.name}</div>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex gap-8 mt-16">
         <button className="btn btn-secondary" onClick={reshuffle}>🔀 ערבב שוב</button>
-        <button className="btn btn-primary btn-full" onClick={()=>onStart(teams)}>▶️ התחל משחק</button>
+        <button className="btn btn-primary btn-full" onClick={()=>onStart(split)}>▶️ התחל משחק</button>
       </div>
     </div>
   );
 }
-
-/* ─── END GAME ─── */
-function EndGame({ players, teams, onSave }) {
-  const [scoreA,setScoreA]=useState(0);
-  const [scoreB,setScoreB]=useState(0);
+ 
+/* ─── END GAME (N teams) ─── */
+function EndGame({ players, split, onSave }) {
+  const teams=split.teams||[];
+  const [scores,setScores]=useState(()=>Array(teams.length).fill(0));
   const [goals,setGoals]=useState({});
   const [warn,setWarn]=useState('');
   const setGoal=(id,delta)=>setGoals(g=>({...g,[id]:Math.max(0,(g[id]||0)+delta)}));
+  const setScore=(i,delta)=>setScores(s=>{const n=[...s];n[i]=Math.max(0,n[i]+delta);return n;});
   const handleSave=()=>{
-    if(scoreA<0||scoreB<0){setWarn('תוצאה לא יכולה להיות שלילית');return;}
-    const tgA=(teams.teamA||[]).reduce((s,p)=>s+(goals[p.id]||0),0);
-    const tgB=(teams.teamB||[]).reduce((s,p)=>s+(goals[p.id]||0),0);
-    if(tgA!==scoreA||tgB!==scoreB) setWarn(`⚠️ שים לב: שערי השחקנים לא מסתכמים לתוצאה. ממשיך בכל זאת.`);
-    onSave({scoreA,scoreB,goals,teams});
+    let w='';
+    teams.forEach((team,i)=>{
+      const tg=(team||[]).reduce((s,p)=>s+(goals[p.id]||0),0);
+      if(tg!==scores[i]) w+=`קבוצה ${TEAM_NAMES_HE[i]}: שערי שחקנים (${tg}) שונה מתוצאה (${scores[i]}). `;
+    });
+    if(w) setWarn(w);
+    onSave({scores,goals,split});
   };
   return (
     <div className="page fade-in">
       <div className="page-title">🏁 סיום משחק</div>
       {warn&&<div style={{background:'rgba(255,145,0,0.1)',border:'1px solid rgba(255,145,0,0.3)',borderRadius:8,padding:'8px 12px',fontSize:13,color:'var(--orange)',marginBottom:12}}>{warn}</div>}
-      <div className="score-section">
-        <div className="score-team">
-          <div className="score-team-name">⚡ קבוצה א׳</div>
-          <div className="score-input-wrap">
-            <button className="goal-btn minus" onClick={()=>setScoreA(s=>Math.max(0,s-1))}>−</button>
-            <div className="score-num">{scoreA}</div>
-            <button className="goal-btn plus" onClick={()=>setScoreA(s=>s+1)}>+</button>
+      {/* Scores */}
+      <div style={{display:'flex',gap:8,marginBottom:16}}>
+        {teams.map((team,i)=>(
+          <div key={i} style={{flex:1,background:'var(--bg3)',border:`1px solid ${TEAM_COLORS[i]}44`,borderRadius:12,padding:'14px 8px',textAlign:'center'}}>
+            <div style={{fontSize:11,fontWeight:700,color:TEAM_COLORS[i],marginBottom:8}}>{TEAM_ICONS[i]} קבוצה {TEAM_NAMES_HE[i]}</div>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+              <button className="goal-btn minus" onClick={()=>setScore(i,-1)}>−</button>
+              <div style={{fontSize:36,fontWeight:900,color:TEAM_COLORS[i],minWidth:36,textAlign:'center'}}>{scores[i]}</div>
+              <button className="goal-btn plus" onClick={()=>setScore(i,1)}>+</button>
+            </div>
           </div>
-        </div>
-        <div className="score-sep">:</div>
-        <div className="score-team">
-          <div className="score-team-name">🌊 קבוצה ב׳</div>
-          <div className="score-input-wrap">
-            <button className="goal-btn minus" onClick={()=>setScoreB(s=>Math.max(0,s-1))}>−</button>
-            <div className="score-num">{scoreB}</div>
-            <button className="goal-btn plus" onClick={()=>setScoreB(s=>s+1)}>+</button>
-          </div>
-        </div>
+        ))}
       </div>
+      {/* Goals per player */}
       <div className="section-title">שערים לשחקן</div>
-      {[{team:teams.teamA,label:'⚡ קבוצה א׳',color:'var(--green)'},{team:teams.teamB,label:'🌊 קבוצה ב׳',color:'var(--neon)'}].map(({team,label,color})=>(
-        <div key={label} className="team-card mb-12">
-          <div className="team-header" style={{background:`linear-gradient(90deg,${color}18,transparent)`}}><div className="team-name" style={{color}}>{label}</div></div>
+      {teams.map((team,i)=>(
+        <div key={i} className="team-card mb-12">
+          <div className="team-header" style={{background:`linear-gradient(90deg,${TEAM_COLORS[i]}18,transparent)`}}>
+            <div className="team-name" style={{color:TEAM_COLORS[i]}}>{TEAM_ICONS[i]} קבוצה {TEAM_NAMES_HE[i]}</div>
+          </div>
           {(team||[]).map(p=>(
             <div key={p.id} className="team-player-row">
               <div className="flex items-center gap-8"><Avatar player={p} size="sm"/><div style={{fontWeight:700,fontSize:14}}>{p.name}</div></div>
@@ -825,7 +961,7 @@ function EndGame({ players, teams, onSave }) {
     </div>
   );
 }
-
+ 
 /* ─── MATCH HISTORY ─── */
 function MatchHistory({ matches, players, onNav }) {
   return (
@@ -852,7 +988,7 @@ function MatchHistory({ matches, players, onNav }) {
     </div>
   );
 }
-
+ 
 /* ─── MATCH DETAIL ─── */
 function MatchDetail({ match, players, matchPlayers }) {
   const pA=players.filter(p=>(match.team_a_player_ids||[]).includes(p.id));
@@ -886,7 +1022,7 @@ function MatchDetail({ match, players, matchPlayers }) {
     </div>
   );
 }
-
+ 
 /* ─── RANKINGS ─── */
 function Rankings({ players }) {
   const sorted=useMemo(()=>[...players].sort((a,b)=>b.rating-a.rating),[players]);
@@ -895,7 +1031,7 @@ function Rankings({ players }) {
       <div className="page-title">🏆 טבלת דירוג</div>
       <div className="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>שם</th><th>דירוג</th><th>מ׳</th><th>נ׳</th><th>ה׳</th><th>⚽</th><th>%נצ׳</th></tr></thead>
+          <thead><tr><th>#</th><th>שם</th><th>דירוג</th><th>בתכל׳ס</th><th>מ׳</th><th>נ׳</th><th>ה׳</th><th>⚽</th><th>%נצ׳</th></tr></thead>
           <tbody>
             {sorted.map((p,i)=>{
               const wr=p.stats.games?Math.round(p.stats.wins/p.stats.games*100):0;
@@ -903,6 +1039,7 @@ function Rankings({ players }) {
                 <td>{i<3?<span className={`rank-badge rank-${i+1}`}>{i+1}</span>:<span style={{color:'var(--text3)',fontWeight:700}}>{i+1}</span>}</td>
                 <td><div className="flex items-center gap-8"><Avatar player={p} size="sm"/><span style={{fontWeight:700}}>{p.name}</span></div></td>
                 <td style={{fontWeight:800,color:'var(--green)'}}>{p.rating}</td>
+                <td style={{color:'var(--gold)',fontSize:13}}>{p.raw_rating>0?'★'.repeat(p.raw_rating):'—'}</td>
                 <td>{p.stats.games}</td><td style={{color:'var(--green)'}}>{p.stats.wins}</td>
                 <td style={{color:'var(--red)'}}>{p.stats.losses}</td><td>{p.stats.goals}</td>
                 <td style={{color:'var(--neon)'}}>{wr}%</td>
@@ -914,7 +1051,7 @@ function Rankings({ players }) {
     </div>
   );
 }
-
+ 
 /* ═══════════ APP ═══════════ */
 function App() {
   const [league,setLeague]=useState(()=>getSession());
@@ -929,22 +1066,22 @@ function App() {
   const [loading,setLoading]=useState(false);
   const showToast=(msg,type='success')=>setToast({msg,type});
   const nav=(s,p={})=>{setScreen(s);setParams(p);};
-
+ 
   const refreshData=useCallback(async(lg)=>{
     const lid=lg.slug;
     const [p,m,mp,rh]=await Promise.all([apiGetPlayers(lid),apiGetMatches(lid),apiGetMatchPlayers(lid),apiGetRatingHistory(lid)]);
     setPlayers(p);setMatches(m);setMatchPlayers(mp);setRatingHistory(rh);
   },[]);
-
+ 
   useEffect(()=>{
     if(league){setLoading(true);refreshData(league).finally(()=>setLoading(false));}
   },[league]);
-
+ 
   const handleLogin=(lg)=>{setLeague(lg);setScreen('dashboard');setGameState(null);};
   const handleLogout=()=>{clearSession();setLeague(null);setPlayers([]);setMatches([]);setMatchPlayers([]);setRatingHistory([]);setScreen('dashboard');setGameState(null);};
-
+ 
   if(!league) return <LoginScreen onLogin={handleLogin}/>;
-
+ 
   /* ─── CRUD ─── */
   const addPlayer=async(data)=>{
     setLoading(true);
@@ -954,7 +1091,7 @@ function App() {
     await refreshData(league);
     setLoading(false);showToast(`${p.name} נוסף! 🎉`);nav('players');
   };
-
+ 
   const editPlayer=async(id,data)=>{
     setLoading(true);
     const{error}=await sb.from('players').update({...data,updated_at:new Date().toISOString()}).eq('id',id);
@@ -962,7 +1099,7 @@ function App() {
     await refreshData(league);
     setLoading(false);showToast('נשמר ✅');nav('player-detail',{playerId:id});
   };
-
+ 
   const deletePlayer=async(id)=>{
     setLoading(true);
     await sb.from('players').delete().eq('id',id);
@@ -970,39 +1107,55 @@ function App() {
     setLoading(false);showToast('שחקן נמחק','warn');
     if(screen==='player-detail') nav('players');
   };
-
-  const saveMatch=async({scoreA,scoreB,goals,teams})=>{
+ 
+  const saveMatch=async({scores,goals,split})=>{
     setLoading(true);
     try{
       const matchId=uid();const now=new Date().toISOString();const lid=league.slug;
-      const match={id:matchId,league_id:lid,date:now,created_at:now,team_a_score:scoreA,team_b_score:scoreB,team_a_player_ids:teams.teamA.map(p=>p.id),team_b_player_ids:teams.teamB.map(p=>p.id),bench_player_id:teams.bench?.id||null};
+      const teamsList=split.teams||[];
+      const bench=split.bench||[];
+      const match={
+        id:matchId,league_id:lid,date:now,created_at:now,
+        team_a_score:scores[0]||0, team_b_score:scores[1]||0,
+        team_a_player_ids:(teamsList[0]||[]).map(p=>p.id),
+        team_b_player_ids:(teamsList[1]||[]).map(p=>p.id),
+        bench_player_id:bench[0]?.id||null,
+      };
       await sb.from('matches').insert(match);
-      const changes=computeRatingChanges(teams.teamA,teams.teamB,scoreA,scoreB,goals);
-      const mps=changes.map(c=>({id:uid(),match_id:matchId,player_id:c.player_id,league_id:lid,team:teams.teamA.find(p=>p.id===c.player_id)?'A':'B',goals:goals[c.player_id]||0,rating_before:c.rating_before,rating_change:c.rating_change,rating_after:c.rating_after}));
+      const changes=computeRatingChangesMulti(teamsList,scores,goals);
+      const mps=changes.map(c=>({id:uid(),match_id:matchId,player_id:c.player_id,league_id:lid,
+        team:TEAM_NAMES_HE[c.teamIndex]||'?',goals:goals[c.player_id]||0,
+        rating_before:c.rating_before,rating_change:c.rating_change,rating_after:c.rating_after}));
       if(mps.length) await sb.from('match_players').insert(mps);
-      const rhs=changes.map(c=>({id:uid(),player_id:c.player_id,match_id:matchId,league_id:lid,date:now,rating_before:c.rating_before,rating_change:c.rating_change,rating_after:c.rating_after,reason:c.reason+(c.bonus?` +בונוס`:'')+(c.goals?` +${c.goals}⚽`:'')}));
+      const rhs=changes.map(c=>({id:uid(),player_id:c.player_id,match_id:matchId,league_id:lid,date:now,
+        rating_before:c.rating_before,rating_change:c.rating_change,rating_after:c.rating_after,
+        reason:c.reason+(c.bonus?` +בונוס`:'')+(c.goals?` +${c.goals}`:'')}));
       if(rhs.length) await sb.from('rating_history').insert(rhs);
-      const wonA=scoreA>scoreB,drewAB=scoreA===scoreB;
+      const maxScore=Math.max(...scores);
+      const isAllTied=scores.every(s=>s===maxScore);
       const updates=changes.map(c=>{
         const curP=players.find(x=>x.id===c.player_id);if(!curP)return null;
-        const inA=teams.teamA.find(x=>x.id===c.player_id);
-        const won=inA?wonA:(!wonA&&!drewAB);const drew=drewAB;const lost=!won&&!drew;
-        return sb.from('players').update({rating:c.rating_after,stats:{games:curP.stats.games+1,wins:curP.stats.wins+(won?1:0),losses:curP.stats.losses+(lost?1:0),draws:curP.stats.draws+(drew?1:0),goals:curP.stats.goals+(goals[c.player_id]||0)},updated_at:now}).eq('id',c.player_id);
+        const myScore=scores[c.teamIndex];
+        const won=!isAllTied&&myScore===maxScore;
+        const tied=isAllTied;const lost=!won&&!tied;
+        return sb.from('players').update({rating:c.rating_after,
+          stats:{games:curP.stats.games+1,wins:curP.stats.wins+(won?1:0),losses:curP.stats.losses+(lost?1:0),draws:curP.stats.draws+(tied?1:0),goals:curP.stats.goals+(goals[c.player_id]||0)},
+          updated_at:now}).eq('id',c.player_id);
       }).filter(Boolean);
       await Promise.all(updates);
       await refreshData(league);
       setGameState(null);showToast('משחק נשמר! 🏆');nav('match-detail',{matchId});
-    }catch(e){showToast('שגיאה בשמירה','error');}
+    }catch(e){console.error(e);showToast('שגיאה בשמירה','error');}
     setLoading(false);
   };
-
+ 
   /* ─── RENDER ─── */
   const titles={dashboard:'Street League ⚽',players:'שחקנים',rankings:'דירוג',history:'היסטוריה','add-player':'שחקן חדש','edit-player':'עריכת שחקן','player-detail':'פרופיל שחקן','match-detail':'פרטי משחק'};
   const renderScreen=()=>{
     if(gameState){
-      if(gameState.phase==='select') return <NewGame players={players} onNext={ids=>setGameState({phase:'teams',selectedIds:ids})}/>;
-      if(gameState.phase==='teams') return <TeamSplit players={players} selectedIds={gameState.selectedIds} onStart={teams=>setGameState({phase:'end',teams})} onBack={()=>setGameState({phase:'select',selectedIds:gameState.selectedIds})}/>;
-      if(gameState.phase==='end') return <EndGame players={players} teams={gameState.teams} onSave={saveMatch} onBack={()=>setGameState(prev=>({...prev,phase:'teams'}))}/>;
+      if(gameState.phase==='select') return <NewGame players={players} onNext={(ids,n)=>setGameState({phase:'teams',selectedIds:ids,numTeams:n})}/>;
+      if(gameState.phase==='teams') return <TeamSplit players={players} selectedIds={gameState.selectedIds} numTeams={gameState.numTeams||2} onStart={split=>setGameState({phase:'end',split})}/>;
+      if(gameState.phase==='end') return <EndGame players={players} split={gameState.split} onSave={saveMatch}/>;
     }
     switch(screen){
       case 'dashboard': return <Dashboard players={players} matches={matches} onNav={nav}/>;
@@ -1029,7 +1182,7 @@ function App() {
       nav(bm[screen]||'dashboard');
     }
   };
-
+ 
   return (
     <div className="app">
       {loading&&<div className="loading-overlay"><div className="spinner"/><div className="loading-text">טוען...</div></div>}
@@ -1053,7 +1206,7 @@ function App() {
     </div>
   );
 }
-
+ 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
