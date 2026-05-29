@@ -512,7 +512,7 @@ function LoginScreen({ onLogin }) {
 }
 
 /* ─── DASHBOARD ─── */
-function Dashboard({ players, matches, onNav }) {
+function Dashboard({ players, matches, onNav, onNewGame }) {
   const topRated=useMemo(()=>[...players].sort((a,b)=>b.rating-a.rating)[0],[players]);
   const topScorer=useMemo(()=>[...players].sort((a,b)=>b.stats.goals-a.stats.goals)[0],[players]);
   const bestWin=useMemo(()=>players.filter(p=>p.stats.games>=3).sort((a,b)=>{const wr=p=>p.stats.games?p.stats.wins/p.stats.games:0;return wr(b)-wr(a);})[0],[players]);
@@ -525,18 +525,19 @@ function Dashboard({ players, matches, onNav }) {
         <div style={{fontSize:13,color:'var(--text2)',marginTop:4}}>הליגה הפרטית שלכם</div>
       </div>
       <div className="dash-cards">
-        <div className="dash-card"><div className="dash-card-icon">👥</div><div className="dash-card-val">{players.length}</div><div className="dash-card-lbl">שחקנים</div></div>
-        <div className="dash-card"><div className="dash-card-icon">🏟️</div><div className="dash-card-val">{matches.length}</div><div className="dash-card-lbl">משחקים</div></div>
-        {topRated&&<div className="dash-card highlight"><div className="dash-card-icon">🏆</div><div className="dash-card-val" style={{fontSize:15}}>{topRated.name}</div><div className="dash-card-lbl">מדורג #1 • {topRated.rating}</div></div>}
-        {topScorer&&<div className="dash-card"><div className="dash-card-icon">⚽</div><div className="dash-card-val" style={{fontSize:15}}>{topScorer.name}</div><div className="dash-card-lbl">מלך שערים • {topScorer.stats.goals} ⚽</div></div>}
-        {bestWin&&<div className="dash-card" style={{gridColumn:'1/-1'}}><div className="flex items-center gap-8"><div className="dash-card-icon">📈</div><div><div style={{fontWeight:800}}>{bestWin.name}</div><div className="dash-card-lbl">% ניצחונות גבוה • {Math.round(bestWin.stats.wins/bestWin.stats.games*100)}% ({bestWin.stats.games} משחקים)</div></div></div></div>}
+        <div className="dash-card" style={{cursor:'pointer'}} onClick={()=>onNav('players')}><div className="dash-card-icon">👥</div><div className="dash-card-val">{players.length}</div><div className="dash-card-lbl">שחקנים</div></div>
+        <div className="dash-card" style={{cursor:'pointer'}} onClick={()=>onNav('history')}><div className="dash-card-icon">🏟️</div><div className="dash-card-val">{matches.length}</div><div className="dash-card-lbl">משחקים</div></div>
+        {topRated&&<div className="dash-card highlight" style={{cursor:'pointer'}} onClick={()=>onNav('rankings')}><div className="dash-card-icon">🏆</div><div className="dash-card-val" style={{fontSize:15}}>{topRated.name}</div><div className="dash-card-lbl">מדורג #1 • {topRated.rating}</div></div>}
+        {topScorer&&<div className="dash-card" style={{cursor:'pointer'}} onClick={()=>onNav('player-detail',{playerId:topScorer.id})}><div className="dash-card-icon">⚽</div><div className="dash-card-val" style={{fontSize:15}}>{topScorer.name}</div><div className="dash-card-lbl">מלך שערים • {topScorer.stats.goals} ⚽</div></div>}
+        {bestWin&&<div className="dash-card" style={{gridColumn:'1/-1',cursor:'pointer'}} onClick={()=>onNav('player-detail',{playerId:bestWin.id})}><div className="flex items-center gap-8"><div className="dash-card-icon">📈</div><div><div style={{fontWeight:800}}>{bestWin.name}</div><div className="dash-card-lbl">% ניצחונות גבוה • {Math.round(bestWin.stats.wins/bestWin.stats.games*100)}% ({bestWin.stats.games} משחקים)</div></div></div></div>}
       </div>
+      <button className="btn btn-primary btn-lg btn-full" style={{marginBottom:16}} onClick={onNewGame}>⚡ משחק חדש</button>
       <div className="flex gap-8 mb-16">
         <button className="btn btn-secondary" style={{flex:1}} onClick={()=>onNav('players')}>👥 שחקנים</button>
         <button className="btn btn-secondary" style={{flex:1}} onClick={()=>onNav('rankings')}>🏆 דירוג</button>
       </div>
       {recent.length>0&&<>
-        <div className="section-title">משחקים אחרונים</div>
+        <div className="section-title" style={{cursor:'pointer'}} onClick={()=>onNav('history')}>משחקים אחרונים ←</div>
         {recent.map(m=>{
           const pA=players.filter(p=>(m.team_a_player_ids||[]).includes(p.id));
           const pB=players.filter(p=>(m.team_b_player_ids||[]).includes(p.id));
@@ -814,6 +815,7 @@ function PlayerDetail({ player, ratingHistory, onNav, onSave }) {
 function NewGame({ players, onNext }) {
   const [selected,setSelected]=useState([]);
   const [numTeams,setNumTeams]=useState(2);
+  const [mode,setMode]=useState('auto');
   const allSelected=selected.length===players.length;
   const toggle=id=>setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
   const toggleAll=()=>setSelected(allSelected?[]:players.map(p=>p.id));
@@ -832,12 +834,24 @@ function NewGame({ players, onNext }) {
           ))}
         </div>
       </div>
+      <div className="card mb-12">
+        <div style={{fontSize:13,fontWeight:700,color:'var(--text2)',marginBottom:10}}>חלוקת קבוצות</div>
+        <div style={{display:'flex',gap:8}}>
+          {[['auto','אוטומטי'],['manual','ידני']].map(([v,lbl])=>(
+            <button key={v} onClick={()=>setMode(v)}
+              style={{flex:1,padding:'10px 0',borderRadius:10,border:`2px solid ${mode===v?TEAM_COLORS[0]:'var(--border)'}`,background:mode===v?`${TEAM_COLORS[0]}18`:'var(--bg3)',color:mode===v?TEAM_COLORS[0]:'var(--text2)',fontWeight:700,fontSize:14,cursor:'pointer',fontFamily:'Heebo,sans-serif',transition:'all 0.15s'}}>
+              {lbl}
+            </button>
+          ))}
+        </div>
+      </div>
       <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <button onClick={toggleAll} style={{background:'none',border:'none',color:'var(--green)',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'Heebo,sans-serif'}}>
           {allSelected?'בטל הכל':'בחר הכל'}
         </button>
         <span style={{fontSize:18,fontWeight:900,color:canDivide?'var(--green)':'var(--text3)'}}>{selected.length} נבחרו</span>
       </div>
+      <div style={{paddingBottom:80}}>
       {players.map(p=>(
         <div key={p.id} className={`player-select-item ${selected.includes(p.id)?'selected':''}`} onClick={()=>toggle(p.id)}>
           <Avatar player={p} size="sm"/>
@@ -845,9 +859,10 @@ function NewGame({ players, onNext }) {
           <div className="sel-check">{selected.includes(p.id)?'✓':''}</div>
         </div>
       ))}
+      </div>
       <div style={{position:'sticky',bottom:70,paddingTop:12,background:'var(--bg)'}}>
-        <button className="btn btn-primary btn-lg btn-full" disabled={!canDivide} onClick={()=>onNext(selected,numTeams)}>
-          חלק ל-{numTeams} קבוצות ({selected.length} שחקנים)
+        <button className="btn btn-primary btn-lg btn-full" disabled={!canDivide} onClick={()=>onNext(selected,numTeams,mode)}>
+          {mode==='manual'?'שיוך ידני':'חלק'} ל-{numTeams} קבוצות ({selected.length} שחקנים)
         </button>
         {!canDivide&&selected.length>0&&<div style={{textAlign:'center',fontSize:12,color:'var(--text3)',marginTop:8}}>נדרשים לפחות {numTeams} שחקנים</div>}
       </div>
@@ -954,6 +969,76 @@ function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
 }
 
 /* ─── TEAM PICKER ─── */
+/* ─── MANUAL TEAM SPLIT ─── */
+function ManualTeamSplit({ players, selectedIds, numTeams, onStart }) {
+  const sel=players.filter(p=>selectedIds.includes(p.id));
+  const target=Math.floor(sel.length/numTeams);
+  const targetExtra=sel.length%numTeams;
+  const teamTarget=i=>target+(i<targetExtra?1:0);
+  const [assign,setAssign]=useState({});
+  const assignPlayer=(pid,ti)=>setAssign(a=>({...a,[pid]:ti}));
+  const teams=Array.from({length:numTeams},(_,i)=>sel.filter(p=>assign[p.id]===i));
+  const unassigned=sel.filter(p=>assign[p.id]==null);
+  const canStart=unassigned.length===0&&teams.every(t=>t.length>0);
+  const handleStart=()=>onStart({teams,bench:[]});
+  return (
+    <div className="page fade-in" style={{paddingBottom:220}}>
+      <div className="page-title">✏️ שיוך ידני</div>
+      {teams.map((team,i)=>{
+        const tgt=teamTarget(i);
+        const full=team.length>=tgt;
+        return (
+          <div key={i} className="card mb-12">
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+              <div style={{fontWeight:800,color:TEAM_COLORS[i],fontSize:14}}>קבוצה {TEAM_NAMES_HE[i]}</div>
+              <div style={{fontSize:12,fontWeight:700,color:full?'var(--green)':'var(--text3)'}}>
+                {team.length} / {tgt} שחקנים
+              </div>
+            </div>
+            {team.length===0&&<div style={{fontSize:12,color:'var(--text3)'}}>לא שויכו שחקנים עדיין</div>}
+            {team.map(p=>(
+              <div key={p.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:'1px solid var(--border)'}}>
+                <Avatar player={p} size="sm"/>
+                <div style={{flex:1,fontWeight:700,fontSize:14}}>{p.name}</div>
+                <button onClick={()=>setAssign(a=>{const n={...a};delete n[p.id];return n;})}
+                  style={{background:'none',border:'1px solid var(--border)',borderRadius:6,padding:'3px 8px',color:'var(--text3)',cursor:'pointer',fontSize:12,fontFamily:'Heebo,sans-serif'}}>
+                  הסר
+                </button>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+      {unassigned.length>0&&(
+        <div className="card mb-12">
+          <div style={{fontWeight:800,color:'var(--text2)',marginBottom:8,fontSize:14}}>לא משויכים <span style={{fontWeight:400,color:'var(--text3)',fontSize:12}}>({unassigned.length})</span></div>
+          {unassigned.map(p=>(
+            <div key={p.id} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+              <Avatar player={p} size="sm"/>
+              <div style={{flex:1,fontWeight:700,fontSize:14}}>{p.name}</div>
+              <div style={{display:'flex',gap:4}}>
+                {Array.from({length:numTeams},(_,i)=>{
+                  const isFull=teams[i].length>=teamTarget(i);
+                  if(isFull) return null;
+                  return (
+                    <button key={i} onClick={()=>assignPlayer(p.id,i)}
+                      style={{width:32,height:32,borderRadius:8,border:`2px solid ${TEAM_COLORS[i]}`,background:`${TEAM_COLORS[i]}18`,color:TEAM_COLORS[i],fontWeight:800,fontSize:13,cursor:'pointer',fontFamily:'Heebo,sans-serif'}}>
+                      {TEAM_NAMES_HE[i]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <button className="btn btn-primary btn-lg btn-full" disabled={!canStart} onClick={handleStart}>
+        {canStart?'התחל משחק':'יש לשייך את כל השחקנים'}
+      </button>
+    </div>
+  );
+}
+
 function TeamPicker({ split, onStart, onFinish, lastWinner=null, lastLoser=null }) {
   const teams=split.teams||[];
   const [selected,setSelected]=useState([]);
@@ -1015,17 +1100,19 @@ function EndGame({ players, split, activePair=[0,1], onSave }) {
     <div className="page fade-in">
       <div className="page-title">🏁 תוצאה</div>
       {/* Live scoreboard */}
-      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16,background:'var(--bg3)',borderRadius:14,padding:'16px 12px',border:'1px solid var(--border)'}}>
+      <div style={{display:'flex',alignItems:'center',marginBottom:16,background:'var(--bg3)',borderRadius:14,padding:'16px 12px',border:'1px solid var(--border)'}}>
         {playingTeams.map((team,slot)=>{
           const ti=activePair[slot];
           return (
-            <div key={slot} style={{flex:1,textAlign:'center',borderRadius:10,padding:'8px 4px'}}>
-              <div style={{fontSize:11,fontWeight:700,color:TEAM_COLORS[ti],marginBottom:4}}>קבוצה {TEAM_NAMES_HE[ti]}</div>
-              <div style={{fontSize:48,fontWeight:900,color:'var(--text)',lineHeight:1}}>{scores[slot]}</div>
-            </div>
+            <React.Fragment key={slot}>
+              {slot===1&&<div style={{fontSize:22,fontWeight:900,color:'var(--text3)',padding:'0 8px',flexShrink:0}}>:</div>}
+              <div style={{flex:1,textAlign:'center',borderRadius:10,padding:'8px 4px'}}>
+                <div style={{fontSize:11,fontWeight:700,color:TEAM_COLORS[ti],marginBottom:4}}>קבוצה {TEAM_NAMES_HE[ti]}</div>
+                <div style={{fontSize:48,fontWeight:900,color:'var(--text)',lineHeight:1}}>{scores[slot]}</div>
+              </div>
+            </React.Fragment>
           );
         })}
-        <div style={{fontSize:22,fontWeight:900,color:'var(--text3)',alignSelf:'center',paddingBottom:8}}>:</div>
       </div>
       <div className="section-title">שערים לשחקן</div>
       {playingTeams.map((team,slot)=>{
@@ -1070,7 +1157,7 @@ function MatchHistory({ matches, players, onNav }) {
             </div>
             <div className="match-result">
               <div className="match-team-name right">{pA.slice(0,3).map(p=>p.name.split(' ')[0]).join(', ')}</div>
-              <div className="match-score" style={{color:win==='A'?'var(--green)':win==='B'?'var(--red)':'var(--text2)'}}>{m.team_a_score} - {m.team_b_score}</div>
+              <div className="match-score" style={{color:win==='D'?'var(--text2)':'var(--green)'}}>{m.team_a_score} - {m.team_b_score}</div>
               <div className="match-team-name left">{pB.slice(0,3).map(p=>p.name.split(' ')[0]).join(', ')}</div>
             </div>
           </div>
@@ -1103,7 +1190,15 @@ function MatchDetail({ match, players, matchPlayers, onDelete }) {
   );
   return (
     <div className="page fade-in">
-      <div className="page-title">🏟️ פרטי משחק</div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+        <div className="page-title" style={{margin:0}}>🏟️ פרטי משחק</div>
+        {!confirmDelete
+          ?<button className="btn btn-danger btn-sm" onClick={()=>setConfirmDelete(true)}>🗑️ מחק</button>
+          :<div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <button className="btn btn-danger btn-sm" onClick={()=>onDelete(match.id)}>מחק</button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>setConfirmDelete(false)}>ביטול</button>
+          </div>}
+      </div>
       <div className="card mb-16" style={{textAlign:'center',borderColor:'var(--green)33'}}>
         <div style={{fontSize:11,color:'var(--text3)',marginBottom:8}}>{formatDate(match.created_at)}</div>
         <div style={{fontSize:48,fontWeight:900,color:'var(--green)'}}>{match.team_a_score} - {match.team_b_score}</div>
@@ -1111,18 +1206,6 @@ function MatchDetail({ match, players, matchPlayers, onDelete }) {
       </div>
       {renderTeam(pA,'⚡ קבוצה א׳','#00e676')}
       {renderTeam(pB,'🌊 קבוצה ב׳','#64ffda')}
-      <div style={{marginTop:8}}>
-        {!confirmDelete
-          ?<button className="btn btn-danger btn-sm" onClick={()=>setConfirmDelete(true)}>🗑️ מחק משחק</button>
-          :<div style={{background:'rgba(255,82,82,0.08)',border:'1px solid rgba(255,82,82,0.3)',borderRadius:10,padding:'12px 16px'}}>
-            <div style={{fontSize:14,fontWeight:700,marginBottom:10}}>למחוק את המשחק ולבטל את שינויי הדירוג?</div>
-            <div style={{display:'flex',gap:8}}>
-              <button className="btn btn-danger btn-sm" onClick={()=>onDelete(match.id)}>מחק</button>
-              <button className="btn btn-ghost btn-sm" onClick={()=>setConfirmDelete(false)}>ביטול</button>
-            </div>
-          </div>
-        }
-      </div>
     </div>
   );
 }
@@ -1216,24 +1299,32 @@ function App() {
     setLoading(true);
     try{
       const lid=league.slug;
-      // Get match_players to know rating changes
+      const {data:matchData}=await sb.from('matches').select('*').eq('id',matchId).single();
       const {data:mps}=await sb.from('match_players').select('*').eq('match_id',matchId);
-      if(mps&&mps.length){
-        // Revert each player's rating and stats
+      if(mps&&mps.length&&matchData){
+        const scoreA=matchData.team_a_score||0;
+        const scoreB=matchData.team_b_score||0;
+        const teamAIds=matchData.team_a_player_ids||[];
+        const teamBIds=matchData.team_b_player_ids||[];
+        const isDraw=scoreA===scoreB;
+        const teamAWon=!isDraw&&scoreA>scoreB;
+        const mpIds=mps.map(mp=>mp.player_id);
+        const {data:freshPlayers}=await sb.from('players').select('*').in('id',mpIds);
         const updates=mps.map(mp=>{
-          const curP=players.find(x=>x.id===mp.player_id);
+          const curP=(freshPlayers||[]).find(x=>x.id===mp.player_id);
           if(!curP)return null;
-          // Determine win/loss/draw from stored reason in rating_history (simplify: use rating_change sign)
-          // We'll revert stats based on whether they won (rating_change > 0 and not just goals)
-          // Safest: just revert rating and goals, and decrement games
+          const inTeamA=teamAIds.includes(mp.player_id);
+          const inTeamB=teamBIds.includes(mp.player_id);
+          const won=inTeamA?teamAWon:inTeamB?!teamAWon:false;
+          const lost=!isDraw&&!won&&(inTeamA||inTeamB);
           const revertedRating=Math.max(100,curP.rating-mp.rating_change);
           return sb.from('players').update({
             rating:revertedRating,
             stats:{
               games:Math.max(0,curP.stats.games-1),
-              wins:curP.stats.wins,
-              losses:curP.stats.losses,
-              draws:curP.stats.draws,
+              wins:Math.max(0,curP.stats.wins-(won?1:0)),
+              losses:Math.max(0,curP.stats.losses-(lost?1:0)),
+              draws:Math.max(0,curP.stats.draws-(isDraw?1:0)),
               goals:Math.max(0,curP.stats.goals-(mp.goals||0))
             },
             updated_at:new Date().toISOString()
@@ -1272,10 +1363,13 @@ function App() {
         rating_before:c.rating_before,rating_change:c.rating_change,rating_after:c.rating_after,
         reason:c.reason+(c.bonus?` +בונוס`:'')+(c.goals?` +${c.goals}`:'')}));
       if(rhs.length) await sb.from('rating_history').insert(rhs);
+      // Fetch fresh player data to avoid stale stats from React state
+      const playerIds=changes.map(c=>c.player_id);
+      const {data:freshPlayers}=await sb.from('players').select('*').in('id',playerIds);
       const maxScore=Math.max(...scores);
       const isAllTied=scores.every(s=>s===maxScore);
       const updates=changes.map(c=>{
-        const curP=players.find(x=>x.id===c.player_id);if(!curP)return null;
+        const curP=(freshPlayers||[]).find(x=>x.id===c.player_id);if(!curP)return null;
         const myScore=scores[c.teamIndex];
         const won=!isAllTied&&myScore===maxScore;
         const tied=isAllTied;const lost=!won&&!tied;
@@ -1299,14 +1393,18 @@ function App() {
   const titles={dashboard:'Street League ⚽',players:'שחקנים',rankings:'דירוג',history:'היסטוריה','add-player':'שחקן חדש','edit-player':'עריכת שחקן','player-detail':'פרופיל שחקן','match-detail':'פרטי משחק'};
   const renderScreen=()=>{
     if(gameState){
-      if(gameState.phase==='select') return <NewGame players={players} onNext={(ids,n)=>setGameState({phase:'teams',selectedIds:ids,numTeams:n})}/>;
+      if(gameState.phase==='select') return <NewGame players={players} onNext={(ids,n,mode)=>setGameState({phase:mode==='manual'?'manual-teams':'teams',selectedIds:ids,numTeams:n})}/>;
       if(gameState.phase==='teams') return <TeamSplit players={players} selectedIds={gameState.selectedIds} numTeams={gameState.numTeams||2} onStart={split=>{
+        if((gameState.numTeams||2)>2) setGameState(prev=>({...prev,phase:'pick-teams',split}));
+        else setGameState(prev=>({...prev,phase:'end',split,activePair:[0,1]}));
+      }}/>;
+      if(gameState.phase==='manual-teams') return <ManualTeamSplit players={players} selectedIds={gameState.selectedIds} numTeams={gameState.numTeams||2} onStart={split=>{
         if((gameState.numTeams||2)>2) setGameState(prev=>({...prev,phase:'pick-teams',split}));
         else setGameState(prev=>({...prev,phase:'end',split,activePair:[0,1]}));
       }}/>;
       if(gameState.phase==='pick-teams') return <TeamPicker split={gameState.split} lastWinner={gameState.lastWinner??null} lastLoser={gameState.lastLoser??null}
         onStart={ap=>setGameState(prev=>({...prev,phase:'end',activePair:ap,lastWinner:null,lastLoser:null}))}
-        onFinish={()=>{setGameState(null);nav('history');}}/>;
+        onFinish={async()=>{await refreshData(league);setGameState(null);nav('history');}}/>;
       if(gameState.phase==='end') return <EndGame players={players} split={gameState.split} activePair={gameState.activePair||[0,1]} onSave={saveMatch}/>;
       if(gameState.phase==='after-game') return (
         <div className="page fade-in">
@@ -1317,13 +1415,13 @@ function App() {
           </div>
           <div style={{display:'flex',gap:10,flexDirection:'column'}}>
             <button className="btn btn-primary btn-lg btn-full" onClick={()=>setGameState(prev=>({...prev,phase:'teams'}))}>⚡ התחל משחק חדש</button>
-            <button className="btn btn-secondary btn-lg btn-full" onClick={()=>{setGameState(null);nav('history');}}>סיום ושמירת המשחקים</button>
+            <button className="btn btn-secondary btn-lg btn-full" onClick={async()=>{await refreshData(league);setGameState(null);nav('history');}}>סיום ושמירת המשחקים</button>
           </div>
         </div>
       );
     }
     switch(screen){
-      case 'dashboard': return <Dashboard players={players} matches={matches} onNav={nav}/>;
+      case 'dashboard': return <Dashboard players={players} matches={matches} onNav={nav} onNewGame={()=>handleNavClick('new-game')}/>;
       case 'players': return <Players players={players} onNav={nav} onDelete={deletePlayer}/>;
       case 'add-player': return <PlayerForm onSave={addPlayer} onBack={()=>nav('players')}/>;
       case 'edit-player':{ const p=players.find(x=>x.id===params.playerId); return p?<PlayerForm player={p} onSave={d=>editPlayer(p.id,d)} onBack={()=>nav('player-detail',{playerId:p.id})}/>:null; }
@@ -1340,7 +1438,7 @@ function App() {
   const handleBack=()=>{
     if(gameState){
       if(gameState.phase==='select'){setGameState(null);nav('dashboard');}
-      else if(gameState.phase==='teams') setGameState({phase:'select',selectedIds:gameState.selectedIds});
+      else if(gameState.phase==='teams'||gameState.phase==='manual-teams') setGameState({phase:'select',selectedIds:gameState.selectedIds,numTeams:gameState.numTeams});
       else if(gameState.phase==='pick-teams') setGameState(prev=>({...prev,phase:'teams'}));
       else if(gameState.phase==='end') setGameState(prev=>({...prev,phase:(prev.numTeams||2)>2?'pick-teams':'teams'}));
       else if(gameState.phase==='after-game') setGameState(prev=>({...prev,phase:'end'}));
@@ -1355,7 +1453,7 @@ function App() {
       {loading&&<div className="loading-overlay"><div className="spinner"/><div className="loading-text">טוען...</div></div>}
       <header className="header">
         {showBack?<button className="header-back" onClick={handleBack}>← חזור</button>:<div className="header-logo" style={{cursor:'pointer'}} onClick={()=>nav('dashboard')}><span>⚽</span>{league.name}</div>}
-        {showBack&&<div style={{fontWeight:700,fontSize:15}}>{gameState?(gameState.phase==='select'?'בחר שחקנים':gameState.phase==='teams'?'חלוקת קבוצות':gameState.phase==='pick-teams'?'בחר קבוצות':gameState.phase==='after-game'?'':' תוצאה'):titles[screen]||''}</div>}
+        {showBack&&<div style={{fontWeight:700,fontSize:15}}>{gameState?(gameState.phase==='select'?'בחר שחקנים':gameState.phase==='teams'?'חלוקת קבוצות':gameState.phase==='manual-teams'?'שיוך ידני':gameState.phase==='pick-teams'?'בחר קבוצות':gameState.phase==='after-game'?'':' תוצאה'):titles[screen]||''}</div>}
         {!showBack&&<div style={{display:'flex',alignItems:'center',gap:8}}>
           <button className="btn btn-sm btn-primary" onClick={()=>nav('add-player')}>+ שחקן</button>
           <button className="btn btn-sm btn-ghost" onClick={handleLogout} style={{padding:'6px 10px'}} title="יציאה">🚪</button>
