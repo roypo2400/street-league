@@ -169,7 +169,7 @@ tr:hover td{background:var(--card2)}
 .loading-text{font-size:14px;color:var(--text2)}
 .rating-history-item{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .rh-change.pos{color:var(--green)}.rh-change.neg{color:var(--red)}.rh-change.neu{color:var(--text3)}
- 
+
 /* Login */
 .login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg);position:relative;overflow:hidden}
 .login-screen::before{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(0,230,118,0.07),transparent 70%);top:-80px;right:-80px;pointer-events:none}
@@ -190,19 +190,19 @@ tr:hover td{background:var(--card2)}
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useCallback, useMemo, useRef } = React;
- 
+
 /* ─── SUPABASE ─── */
 const SUPABASE_URL = 'https://eapelkekvmdbefeabmbl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhcGVsa2Vrdm1kYmVmZWFibWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNjI1NjYsImV4cCI6MjA5NTYzODU2Nn0.-bu9RMrtO7_iSBgYaw-k_QYywc2m_h6of2gBERUpuVo';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
 /* ─── CONSTANTS ─── */
 const POSITIONS = { GK:'שוער', DEF:'הגנה', MID:'קישור', FWD:'התקפה', ANY:'כלבו' };
 const FEET = { right:'ימין', left:'שמאל', both:'שתיהן' };
 const SKILLS_DEF = ['pace','shooting','passing','dribbling','defending','physical','vision','finishing'];
 const SKILL_LABELS = { pace:'מהירות', shooting:'בעיטה', passing:'מסירה', dribbling:'דריבל', defending:'הגנה', physical:'פיזיות', vision:'ראייה', finishing:'סיומת' };
 const POS_COLORS = { GK:'#ffd700', DEF:'#00bcd4', MID:'#00e676', FWD:'#ff5252', ANY:'#b39ddb' };
- 
+
 /* ─── LEAGUE API ─── */
 const hashPin = (pin) => {
   let h = 0;
@@ -210,7 +210,7 @@ const hashPin = (pin) => {
   return (h>>>0).toString(36);
 };
 const slugify = (name) => name.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^\wא-ת]/g,'');
- 
+
 const apiGetLeagues = async () => {
   const { data } = await sb.from('leagues').select('*').order('created_at');
   return data || [];
@@ -227,7 +227,7 @@ const apiVerifyLeague = async (slug, pin) => {
   if (data.pin_hash !== hashPin(pin)) return { error: 'קוד שגוי' };
   return { ok: true, league: data };
 };
- 
+
 /* ─── DATA API ─── */
 const apiGetPlayers = async (lid) => {
   const { data } = await sb.from('players').select('*').eq('league_id', lid).order('rating', {ascending:false});
@@ -245,13 +245,13 @@ const apiGetRatingHistory = async (lid) => {
   const { data } = await sb.from('rating_history').select('*').eq('league_id', lid).order('date', {ascending:false});
   return data || [];
 };
- 
+
 /* ─── SESSION ─── */
 const SESSION_KEY = '__sl_session__';
 const getSession = () => { try { const v=sessionStorage.getItem(SESSION_KEY); return v?JSON.parse(v):null; } catch { return null; } };
 const setSession = (l) => { try { sessionStorage.setItem(SESSION_KEY,JSON.stringify(l)); } catch {} };
 const clearSession = () => { try { sessionStorage.removeItem(SESSION_KEY); } catch {} };
- 
+
 /* ─── UTILS ─── */
 const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
@@ -261,12 +261,12 @@ const avatarColor = name => {
   let h=0; for(let c of (name||'')) h=(h*31+c.charCodeAt(0))%colors.length; return colors[h];
 };
 const formatDate = ts => new Date(ts).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'2-digit'});
- 
+
 /* ─── TEAM CONSTANTS ─── */
 const TEAM_COLORS=['#00e676','#64ffda','#ff9100','#b39ddb'];
 const TEAM_NAMES_HE=['א׳','ב׳','ג׳','ד׳'];
 const TEAM_ICONS=['⚡','🌊','🔥','💫'];
- 
+
 /* ─── RATING ENGINE ─── */
 function computeRatingChanges(teamAPlayers, teamBPlayers, teamAScore, teamBScore, goalMap) {
   const avgA = avg(teamAPlayers.map(p=>p.rating));
@@ -289,7 +289,7 @@ function computeRatingChanges(teamAPlayers, teamBPlayers, teamAScore, teamBScore
   process(teamBPlayers, teamBScore, teamAScore, avgB, avgA);
   return changes;
 }
- 
+
 /* ─── TEAM BALANCER ─── */
 function balanceTeams(players, numTeams=2, attempt=0, useRaw=false) {
   if (players.length < numTeams) return { teams:[players,...Array(numTeams-1).fill([])], bench:[] };
@@ -323,7 +323,7 @@ function balanceTeams(players, numTeams=2, attempt=0, useRaw=false) {
   });
   return { teams, bench };
 }
- 
+
 /* ─── RATING ENGINE (N teams) ─── */
 function computeRatingChangesMulti(teamPlayers, scores, goalMap) {
   const maxScore=Math.max(...scores);
@@ -349,7 +349,7 @@ function computeRatingChangesMulti(teamPlayers, scores, goalMap) {
   });
   return changes;
 }
- 
+
 /* ─── SKILL RADAR ─── */
 function SkillRadar({ skills, size=200 }) {
   const n=SKILLS_DEF.length, cx=size/2, cy=size/2, r=size*0.36, labelR=size*0.46;
@@ -367,7 +367,7 @@ function SkillRadar({ skills, size=200 }) {
     </svg>
   );
 }
- 
+
 /* ─── AVATAR ─── */
 function Avatar({ player, size='md' }) {
   const bg=`linear-gradient(135deg,${avatarColor(player.name)}44,${avatarColor(player.name)}22)`;
@@ -375,13 +375,13 @@ function Avatar({ player, size='md' }) {
   if (player.photo) return <img src={player.photo} className={`avatar-${size}`} style={{objectFit:'cover',border}} alt={player.name}/>;
   return <div className={`avatar-${size}`} style={{background:bg,border,color:avatarColor(player.name)}}>{initials(player.name)}</div>;
 }
- 
+
 /* ─── TOAST ─── */
 function Toast({ msg, type='success', onDone }) {
   useEffect(()=>{const t=setTimeout(onDone,3500);return()=>clearTimeout(t);},[]);
   return <div className={`toast ${type}`}><span>{{success:'✅',error:'❌',warn:'⚠️'}[type]}</span>{msg}</div>;
 }
- 
+
 /* ─── CONFIRM MODAL ─── */
 function ConfirmModal({ title, msg, onConfirm, onCancel }) {
   return (
@@ -397,7 +397,7 @@ function ConfirmModal({ title, msg, onConfirm, onCancel }) {
     </div>
   );
 }
- 
+
 /* ─── LOGIN SCREEN ─── */
 function LoginScreen({ onLogin }) {
   const [mode, setMode] = useState('choose');
@@ -408,11 +408,11 @@ function LoginScreen({ onLogin }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const pinRefs = [useRef(),useRef(),useRef(),useRef()];
- 
+
   useEffect(()=>{
     apiGetLeagues().then(ls=>{ setLeagues(ls); setLlLoading(false); });
   },[]);
- 
+
   const handlePinChange=(i,v)=>{
     const d=v.replace(/\D/,'').slice(-1);
     const next=[...pin]; next[i]=d; setPin(next);
@@ -422,7 +422,11 @@ function LoginScreen({ onLogin }) {
   const pinFull=pin.every(d=>d!=='');
   const pinStr=pin.join('');
   const resetPin=()=>setPin(['','','','']);
- 
+
+  useEffect(()=>{
+    if(pinFull&&name.trim()&&!busy) isCreate?doCreate():doLogin();
+  },[pinFull]);
+
   const doCreate=async()=>{
     if(!name.trim()){setError('הזן שם קבוצה');return;}
     if(!pinFull){setError('הזן קוד 4 ספרות');return;}
@@ -432,7 +436,7 @@ function LoginScreen({ onLogin }) {
     const vr=await apiVerifyLeague(res.slug,pinStr);
     setSession(vr.league); onLogin(vr.league);
   };
- 
+
   const doLogin=async()=>{
     if(!name.trim()){setError('הזן שם קבוצה');return;}
     if(!pinFull){setError('הזן קוד');return;}
@@ -441,9 +445,9 @@ function LoginScreen({ onLogin }) {
     if(res.error){setError(res.error);setBusy(false);return;}
     setSession(res.league); onLogin(res.league);
   };
- 
+
   const quickLogin=(league)=>{ setName(league.name); setMode('login'); setError(''); resetPin(); setTimeout(()=>pinRefs[0].current?.focus(),100); };
- 
+
   if (mode==='choose') return (
     <div className="login-screen">
       <div className="login-card">
@@ -473,7 +477,7 @@ function LoginScreen({ onLogin }) {
       </div>
     </div>
   );
- 
+
   const isCreate=mode==='create';
   return (
     <div className="login-screen">
@@ -506,7 +510,7 @@ function LoginScreen({ onLogin }) {
     </div>
   );
 }
- 
+
 /* ─── DASHBOARD ─── */
 function Dashboard({ players, matches, onNav }) {
   const topRated=useMemo(()=>[...players].sort((a,b)=>b.rating-a.rating)[0],[players]);
@@ -551,7 +555,7 @@ function Dashboard({ players, matches, onNav }) {
     </div>
   );
 }
- 
+
 /* ─── PLAYERS LIST ─── */
 function Players({ players, onNav, onDelete }) {
   const [search,setSearch]=useState('');
@@ -598,7 +602,7 @@ function Players({ players, onNav, onDelete }) {
     </div>
   );
 }
- 
+
 /* ─── PLAYER FORM ─── */
 function PlayerForm({ player:initial, onSave, onBack }) {
   const isEdit=!!initial;
@@ -681,7 +685,7 @@ function PlayerForm({ player:initial, onSave, onBack }) {
     </div>
   );
 }
- 
+
 /* ─── PLAYER DETAIL ─── */
 function PlayerDetail({ player, ratingHistory, onNav, onSave }) {
   const winRate=player.stats.games?Math.round(player.stats.wins/player.stats.games*100):0;
@@ -805,7 +809,7 @@ function PlayerDetail({ player, ratingHistory, onNav, onSave }) {
     </div>
   );
 }
- 
+
 /* ─── NEW GAME ─── */
 function NewGame({ players, onNext }) {
   const [selected,setSelected]=useState([]);
@@ -850,7 +854,7 @@ function NewGame({ players, onNext }) {
     </div>
   );
 }
- 
+
 /* ─── TEAM SPLIT ─── */
 function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
   const sel=useMemo(()=>players.filter(p=>selectedIds.includes(p.id)),[players,selectedIds]);
@@ -900,7 +904,7 @@ function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
         </div>
         <div style={{display:'flex',justifyContent:'space-between',marginTop:6}}>
           {split.teams.map((t,i)=>(
-            <div key={i} style={{fontSize:11,color:TEAM_COLORS[i],fontWeight:700}}>{TEAM_ICONS[i]} {avgR(t)}</div>
+            <div key={i} style={{fontSize:11,color:TEAM_COLORS[i],fontWeight:700}}>{avgR(t)}</div>
           ))}
         </div>
       </div>
@@ -908,7 +912,7 @@ function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
         <div key={ti} className="team-card">
           <div className="team-header" style={{background:`linear-gradient(90deg,${TEAM_COLORS[ti]}18,transparent)`}}>
             <div>
-              <div className="team-name" style={{color:TEAM_COLORS[ti]}}>{TEAM_ICONS[ti]} קבוצה {TEAM_NAMES_HE[ti]}</div>
+              <div className="team-name" style={{color:TEAM_COLORS[ti]}}>קבוצה {TEAM_NAMES_HE[ti]}</div>
               <div className="team-meta">{team.length} שחקנים • ממוצע: {avgR(team)}</div>
             </div>
           </div>
@@ -922,7 +926,7 @@ function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
                 {split.teams.map((_,toIdx)=>toIdx!==ti&&(
                   <button key={toIdx} className="btn btn-ghost btn-sm" style={{color:TEAM_COLORS[toIdx],borderColor:TEAM_COLORS[toIdx]+'44',padding:'4px 8px'}}
                     onClick={()=>movePlayer(p.id,ti,toIdx)}>
-                    {TEAM_ICONS[toIdx]}
+                    {TEAM_NAMES_HE[toIdx]}
                   </button>
                 ))}
               </div>
@@ -943,97 +947,93 @@ function TeamSplit({ players, selectedIds, numTeams=2, onStart }) {
       )}
       <div className="flex gap-8 mt-16">
         <button className="btn btn-secondary" onClick={reshuffle}>🔀 ערבב שוב</button>
-        <button className="btn btn-primary btn-full" onClick={()=>onStart({...split,activePair:[0,1],benchQueue:split.teams.slice(2).map((_,i)=>i+2)})}>▶️ התחל משחק</button>
+        <button className="btn btn-primary btn-full" onClick={()=>onStart(split)}>▶️ התחל משחק</button>
       </div>
     </div>
   );
 }
- 
+
+/* ─── TEAM PICKER ─── */
+function TeamPicker({ split, onStart, onFinish, lastWinner=null, lastLoser=null }) {
+  const teams=split.teams||[];
+  const [selected,setSelected]=useState([]);
+  const toggle=i=>{
+    if(selected.includes(i)) setSelected(s=>s.filter(x=>x!==i));
+    else if(selected.length<2) setSelected(s=>[...s,i]);
+  };
+  return (
+    <div className="page fade-in">
+      <div className="page-title">⚡ מי משחקת עכשיו?</div>
+      <div style={{fontSize:13,color:'var(--text2)',marginBottom:16}}>בחר 2 קבוצות שישחקו</div>
+      {teams.map((team,i)=>{
+        const isSel=selected.includes(i);
+        const selNum=selected.indexOf(i);
+        const isWinner=lastWinner===i;
+        const isLoser=lastLoser===i;
+        return (
+          <div key={i} onClick={()=>toggle(i)}
+            style={{background:isSel?`${TEAM_COLORS[i]}18`:'var(--card)',border:`2px solid ${isSel?TEAM_COLORS[i]:isWinner?TEAM_COLORS[i]+'88':'var(--border)'}`,borderRadius:12,padding:'14px 16px',marginBottom:10,cursor:'pointer',display:'flex',alignItems:'center',gap:12,transition:'all 0.15s'}}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:800,color:TEAM_COLORS[i],fontSize:15,display:'flex',alignItems:'center',gap:6}}>
+                קבוצה {TEAM_NAMES_HE[i]}
+                {isWinner&&<span style={{fontSize:13,color:'var(--gold)'}}>★ ניצחה</span>}
+                {isLoser&&<span style={{fontSize:12,color:'var(--text3)'}}>הפסידה</span>}
+              </div>
+              <div style={{fontSize:12,color:'var(--text3)',marginTop:2}}>{team.map(p=>p.name).join(', ')}</div>
+            </div>
+            {isSel&&<div style={{width:28,height:28,borderRadius:'50%',background:TEAM_COLORS[i],display:'flex',alignItems:'center',justifyContent:'center',color:'#000',fontWeight:900,fontSize:14}}>{selNum+1}</div>}
+          </div>
+        );
+      })}
+      <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:10}}>
+        <button className="btn btn-primary btn-lg btn-full" disabled={selected.length!==2}
+          onClick={()=>onStart(selected)}>
+          ▶️ התחל משחק
+        </button>
+        {selected.length<2&&<div style={{textAlign:'center',fontSize:12,color:'var(--text3)'}}>בחר 2 קבוצות</div>}
+        {onFinish&&<button className="btn btn-secondary btn-lg btn-full" onClick={onFinish}>סיום ושמירת המשחקים</button>}
+      </div>
+    </div>
+  );
+}
+
 /* ─── END GAME ─── */
-function EndGame({ players, split, onSave }) {
+function EndGame({ players, split, activePair=[0,1], onSave }) {
   const allTeams=split.teams||[];
-  const activePair=split.activePair||[0,1];
-  const benchQueue=split.benchQueue||[];
-  const hasRotation=benchQueue.length>0;
- 
-  // active teams are the 2 playing now
   const [goals,setGoals]=useState({});
- 
   const playingTeams=activePair.map(i=>allTeams[i]);
   const setGoal=(id,delta)=>setGoals(g=>({...g,[id]:Math.max(0,(g[id]||0)+delta)}));
   const teamScore=slot=>(playingTeams[slot]||[]).reduce((s,p)=>s+(goals[p.id]||0),0);
   const scores=[teamScore(0),teamScore(1)];
- 
-  // Build a 2-team split for saving (only the playing pair)
-  const buildSaveData=()=>{
-    const twoTeamSplit={...split,teams:[playingTeams[0],playingTeams[1]],activePair:[0,1],benchQueue:[]};
-    return {scores,goals,split:twoTeamSplit};
+  const winnerSlot=scores[0]>scores[1]?0:scores[1]>scores[0]?1:null;
+  const winnerTeamIdx=winnerSlot!==null?activePair[winnerSlot]:null;
+  const loserTeamIdx=winnerSlot!==null?activePair[1-winnerSlot]:null;
+  const handleSave=()=>{
+    onSave({scores,goals,split:{...split,teams:[playingTeams[0],playingTeams[1]],bench:split.bench||[]},winnerTeamIdx,loserTeamIdx});
   };
- 
-  // Rotate: winner stays, loser → end of bench, bench[0] → playing
-  const rotate=()=>{
-    const [s0,s1]=scores;
-    // loser slot: lower score (tie → slot 0 goes off)
-    const loserSlot=s0>s1?1:0;
-    const winnerSlot=1-loserSlot;
-    const winnerIdx=activePair[winnerSlot];
-    const loserIdx=activePair[loserSlot];
-    const nextInIdx=benchQueue[0];
-    const newBenchQueue=[...benchQueue.slice(1),loserIdx];
-    const newActivePair=[winnerIdx,nextInIdx];
-    const nextSplit={...split,activePair:newActivePair,benchQueue:newBenchQueue};
-    return nextSplit;
-  };
- 
-  const handleSaveAndRotate=()=>{
-    const nextSplit=rotate();
-    onSave({...buildSaveData(),nextSplit,continueRotation:true});
-  };
- 
-  const handleSaveFinal=()=>{
-    onSave({...buildSaveData(),continueRotation:false});
-  };
- 
   return (
     <div className="page fade-in">
       <div className="page-title">🏁 תוצאה</div>
- 
-      {/* Bench indicator */}
-      {hasRotation&&(
-        <div style={{background:'var(--bg3)',border:'1px solid var(--orange)33',borderRadius:10,padding:'8px 14px',marginBottom:14,display:'flex',alignItems:'center',gap:10}}>
-          <div style={{fontSize:11,color:'var(--orange)',fontWeight:700}}>ממתינה:</div>
-          <div style={{display:'flex',gap:6}}>
-            {benchQueue.map(bi=>(
-              <div key={bi} style={{fontSize:12,color:'var(--text2)',background:'var(--card)',borderRadius:6,padding:'2px 8px',border:`1px solid ${TEAM_COLORS[bi]}44`,color:TEAM_COLORS[bi]}}>
-                {TEAM_ICONS[bi]} קבוצה {TEAM_NAMES_HE[bi]}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
- 
       {/* Live scoreboard */}
-      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16,background:'var(--bg3)',borderRadius:14,padding:'16px 12px',border:'1px solid var(--border)'}}>
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16,background:'var(--bg3)',borderRadius:14,padding:'16px 12px',border:'1px solid var(--border)'}}>
         {playingTeams.map((team,slot)=>{
           const ti=activePair[slot];
           return (
-            <div key={slot} style={{flex:1,textAlign:'center'}}>
-              <div style={{fontSize:11,fontWeight:700,color:TEAM_COLORS[ti],marginBottom:4}}>{TEAM_ICONS[ti]} קבוצה {TEAM_NAMES_HE[ti]}</div>
-              <div style={{fontSize:44,fontWeight:900,color:TEAM_COLORS[ti],lineHeight:1}}>{scores[slot]}</div>
+            <div key={slot} style={{flex:1,textAlign:'center',borderRadius:10,padding:'8px 4px'}}>
+              <div style={{fontSize:11,fontWeight:700,color:TEAM_COLORS[ti],marginBottom:4}}>קבוצה {TEAM_NAMES_HE[ti]}</div>
+              <div style={{fontSize:48,fontWeight:900,color:'var(--text)',lineHeight:1}}>{scores[slot]}</div>
             </div>
           );
         })}
-        <div style={{fontSize:22,fontWeight:900,color:'var(--text3)'}}>:</div>
+        <div style={{fontSize:22,fontWeight:900,color:'var(--text3)',alignSelf:'center',paddingBottom:8}}>:</div>
       </div>
- 
-      {/* Goals per player */}
       <div className="section-title">שערים לשחקן</div>
       {playingTeams.map((team,slot)=>{
         const ti=activePair[slot];
         return (
           <div key={slot} className="team-card mb-12">
             <div className="team-header" style={{background:`linear-gradient(90deg,${TEAM_COLORS[ti]}18,transparent)`}}>
-              <div className="team-name" style={{color:TEAM_COLORS[ti]}}>{TEAM_ICONS[ti]} קבוצה {TEAM_NAMES_HE[ti]}</div>
+              <div className="team-name" style={{color:TEAM_COLORS[ti]}}>קבוצה {TEAM_NAMES_HE[ti]}</div>
             </div>
             {(team||[]).map(p=>(
               <div key={p.id} className="team-player-row">
@@ -1048,23 +1048,11 @@ function EndGame({ players, split, onSave }) {
           </div>
         );
       })}
- 
-      {hasRotation?(
-        <div style={{display:'flex',gap:8}}>
-          <button className="btn btn-primary btn-full" onClick={handleSaveAndRotate}>
-            שמור וסבב קבוצות
-          </button>
-          <button className="btn btn-secondary" onClick={handleSaveFinal}>
-            סיום
-          </button>
-        </div>
-      ):(
-        <button className="btn btn-primary btn-lg btn-full" onClick={handleSaveFinal}>💾 שמור משחק</button>
-      )}
+      <button className="btn btn-primary btn-lg btn-full" onClick={handleSave}>סיום משחק</button>
     </div>
   );
 }
- 
+
 /* ─── MATCH HISTORY ─── */
 function MatchHistory({ matches, players, onNav }) {
   return (
@@ -1091,9 +1079,10 @@ function MatchHistory({ matches, players, onNav }) {
     </div>
   );
 }
- 
+
 /* ─── MATCH DETAIL ─── */
-function MatchDetail({ match, players, matchPlayers }) {
+function MatchDetail({ match, players, matchPlayers, onDelete }) {
+  const [confirmDelete,setConfirmDelete]=useState(false);
   const pA=players.filter(p=>(match.team_a_player_ids||[]).includes(p.id));
   const pB=players.filter(p=>(match.team_b_player_ids||[]).includes(p.id));
   const mps=matchPlayers.filter(mp=>mp.match_id===match.id);
@@ -1122,10 +1111,22 @@ function MatchDetail({ match, players, matchPlayers }) {
       </div>
       {renderTeam(pA,'⚡ קבוצה א׳','#00e676')}
       {renderTeam(pB,'🌊 קבוצה ב׳','#64ffda')}
+      <div style={{marginTop:8}}>
+        {!confirmDelete
+          ?<button className="btn btn-danger btn-sm" onClick={()=>setConfirmDelete(true)}>🗑️ מחק משחק</button>
+          :<div style={{background:'rgba(255,82,82,0.08)',border:'1px solid rgba(255,82,82,0.3)',borderRadius:10,padding:'12px 16px'}}>
+            <div style={{fontSize:14,fontWeight:700,marginBottom:10}}>למחוק את המשחק ולבטל את שינויי הדירוג?</div>
+            <div style={{display:'flex',gap:8}}>
+              <button className="btn btn-danger btn-sm" onClick={()=>onDelete(match.id)}>מחק</button>
+              <button className="btn btn-ghost btn-sm" onClick={()=>setConfirmDelete(false)}>ביטול</button>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   );
 }
- 
+
 /* ─── RANKINGS ─── */
 function Rankings({ players }) {
   const sorted=useMemo(()=>[...players].sort((a,b)=>b.rating-a.rating),[players]);
@@ -1154,7 +1155,7 @@ function Rankings({ players }) {
     </div>
   );
 }
- 
+
 /* ═══════════ APP ═══════════ */
 function App() {
   const [league,setLeague]=useState(()=>getSession());
@@ -1169,22 +1170,22 @@ function App() {
   const [loading,setLoading]=useState(false);
   const showToast=(msg,type='success')=>setToast({msg,type});
   const nav=(s,p={})=>{setScreen(s);setParams(p);};
- 
+
   const refreshData=useCallback(async(lg)=>{
     const lid=lg.slug;
     const [p,m,mp,rh]=await Promise.all([apiGetPlayers(lid),apiGetMatches(lid),apiGetMatchPlayers(lid),apiGetRatingHistory(lid)]);
     setPlayers(p);setMatches(m);setMatchPlayers(mp);setRatingHistory(rh);
   },[]);
- 
+
   useEffect(()=>{
     if(league){setLoading(true);refreshData(league).finally(()=>setLoading(false));}
   },[league]);
- 
+
   const handleLogin=(lg)=>{setLeague(lg);setScreen('dashboard');setGameState(null);};
   const handleLogout=()=>{clearSession();setLeague(null);setPlayers([]);setMatches([]);setMatchPlayers([]);setRatingHistory([]);setScreen('dashboard');setGameState(null);};
- 
+
   if(!league) return <LoginScreen onLogin={handleLogin}/>;
- 
+
   /* ─── CRUD ─── */
   const addPlayer=async(data)=>{
     setLoading(true);
@@ -1194,7 +1195,7 @@ function App() {
     await refreshData(league);
     setLoading(false);showToast(`${p.name} נוסף! 🎉`);nav('players');
   };
- 
+
   const editPlayer=async(id,data)=>{
     setLoading(true);
     const{error}=await sb.from('players').update({...data,updated_at:new Date().toISOString()}).eq('id',id);
@@ -1202,7 +1203,7 @@ function App() {
     await refreshData(league);
     setLoading(false);showToast('נשמר ✅');nav('player-detail',{playerId:id});
   };
- 
+
   const deletePlayer=async(id)=>{
     setLoading(true);
     await sb.from('players').delete().eq('id',id);
@@ -1210,8 +1211,47 @@ function App() {
     setLoading(false);showToast('שחקן נמחק','warn');
     if(screen==='player-detail') nav('players');
   };
- 
-  const saveMatch=async({scores,goals,split,continueRotation,nextSplit})=>{
+
+  const deleteMatch=async(matchId)=>{
+    setLoading(true);
+    try{
+      const lid=league.slug;
+      // Get match_players to know rating changes
+      const {data:mps}=await sb.from('match_players').select('*').eq('match_id',matchId);
+      if(mps&&mps.length){
+        // Revert each player's rating and stats
+        const updates=mps.map(mp=>{
+          const curP=players.find(x=>x.id===mp.player_id);
+          if(!curP)return null;
+          // Determine win/loss/draw from stored reason in rating_history (simplify: use rating_change sign)
+          // We'll revert stats based on whether they won (rating_change > 0 and not just goals)
+          // Safest: just revert rating and goals, and decrement games
+          const revertedRating=Math.max(100,curP.rating-mp.rating_change);
+          return sb.from('players').update({
+            rating:revertedRating,
+            stats:{
+              games:Math.max(0,curP.stats.games-1),
+              wins:curP.stats.wins,
+              losses:curP.stats.losses,
+              draws:curP.stats.draws,
+              goals:Math.max(0,curP.stats.goals-(mp.goals||0))
+            },
+            updated_at:new Date().toISOString()
+          }).eq('id',mp.player_id);
+        }).filter(Boolean);
+        await Promise.all(updates);
+      }
+      await sb.from('rating_history').delete().eq('match_id',matchId);
+      await sb.from('match_players').delete().eq('match_id',matchId);
+      await sb.from('matches').delete().eq('id',matchId);
+      await refreshData(league);
+      showToast('משחק נמחק והדירוג בוטל');
+      nav('history');
+    }catch(e){console.error(e);showToast('שגיאה במחיקה','error');}
+    setLoading(false);
+  };
+
+  const saveMatch=async({scores,goals,split,winnerTeamIdx=null,loserTeamIdx=null})=>{
     setLoading(true);
     try{
       const matchId=uid();const now=new Date().toISOString();const lid=league.slug;
@@ -1244,24 +1284,43 @@ function App() {
           updated_at:now}).eq('id',c.player_id);
       }).filter(Boolean);
       await Promise.all(updates);
-      await refreshData(league);
-      if(continueRotation&&nextSplit){
-        showToast('משחק נשמר! סיבוב הבא');
-        setGameState(prev=>({...prev,phase:'end',split:nextSplit}));
+      if((gameState.numTeams||2)>2){
+        showToast('משחק נשמר!');
+        setGameState(prev=>({...prev,phase:'pick-teams',lastWinner:winnerTeamIdx,lastLoser:loserTeamIdx}));
       }else{
-        setGameState(null);showToast('משחקים נשמרו! 🏆');nav('match-detail',{matchId});
+        showToast('משחק נשמר!');
+        setGameState(prev=>({...prev,phase:'after-game',lastMatchId:matchId}));
       }
     }catch(e){console.error(e);showToast('שגיאה בשמירה','error');}
     setLoading(false);
   };
- 
+
   /* ─── RENDER ─── */
   const titles={dashboard:'Street League ⚽',players:'שחקנים',rankings:'דירוג',history:'היסטוריה','add-player':'שחקן חדש','edit-player':'עריכת שחקן','player-detail':'פרופיל שחקן','match-detail':'פרטי משחק'};
   const renderScreen=()=>{
     if(gameState){
       if(gameState.phase==='select') return <NewGame players={players} onNext={(ids,n)=>setGameState({phase:'teams',selectedIds:ids,numTeams:n})}/>;
-      if(gameState.phase==='teams') return <TeamSplit players={players} selectedIds={gameState.selectedIds} numTeams={gameState.numTeams||2} onStart={split=>setGameState(prev=>({...prev,phase:'end',split}))}/>;
-      if(gameState.phase==='end') return <EndGame players={players} split={gameState.split} onSave={saveMatch}/>;
+      if(gameState.phase==='teams') return <TeamSplit players={players} selectedIds={gameState.selectedIds} numTeams={gameState.numTeams||2} onStart={split=>{
+        if((gameState.numTeams||2)>2) setGameState(prev=>({...prev,phase:'pick-teams',split}));
+        else setGameState(prev=>({...prev,phase:'end',split,activePair:[0,1]}));
+      }}/>;
+      if(gameState.phase==='pick-teams') return <TeamPicker split={gameState.split} lastWinner={gameState.lastWinner??null} lastLoser={gameState.lastLoser??null}
+        onStart={ap=>setGameState(prev=>({...prev,phase:'end',activePair:ap,lastWinner:null,lastLoser:null}))}
+        onFinish={()=>{setGameState(null);nav('history');}}/>;
+      if(gameState.phase==='end') return <EndGame players={players} split={gameState.split} activePair={gameState.activePair||[0,1]} onSave={saveMatch}/>;
+      if(gameState.phase==='after-game') return (
+        <div className="page fade-in">
+          <div style={{textAlign:'center',padding:'40px 20px'}}>
+            <div style={{fontSize:48,marginBottom:8}}>🏆</div>
+            <div style={{fontSize:22,fontWeight:900,marginBottom:4}}>המשחק נשמר!</div>
+            <div style={{fontSize:13,color:'var(--text3)',marginBottom:32}}>מה עכשיו?</div>
+          </div>
+          <div style={{display:'flex',gap:10,flexDirection:'column'}}>
+            <button className="btn btn-primary btn-lg btn-full" onClick={()=>setGameState(prev=>({...prev,phase:'teams'}))}>⚡ התחל משחק חדש</button>
+            <button className="btn btn-secondary btn-lg btn-full" onClick={()=>{setGameState(null);nav('history');}}>סיום ושמירת המשחקים</button>
+          </div>
+        </div>
+      );
     }
     switch(screen){
       case 'dashboard': return <Dashboard players={players} matches={matches} onNav={nav}/>;
@@ -1270,7 +1329,7 @@ function App() {
       case 'edit-player':{ const p=players.find(x=>x.id===params.playerId); return p?<PlayerForm player={p} onSave={d=>editPlayer(p.id,d)} onBack={()=>nav('player-detail',{playerId:p.id})}/>:null; }
       case 'player-detail':{ const p=players.find(x=>x.id===params.playerId); return p?<PlayerDetail player={p} ratingHistory={ratingHistory} onNav={nav} onSave={d=>editPlayer(p.id,d)}/>:null; }
       case 'history': return <MatchHistory matches={matches} players={players} onNav={nav}/>;
-      case 'match-detail':{ const m=matches.find(x=>x.id===params.matchId); return m?<MatchDetail match={m} players={players} matchPlayers={matchPlayers}/>:null; }
+      case 'match-detail':{ const m=matches.find(x=>x.id===params.matchId); return m?<MatchDetail match={m} players={players} matchPlayers={matchPlayers} onDelete={deleteMatch}/>:null; }
       case 'rankings': return <Rankings players={players}/>;
       default: return <Dashboard players={players} matches={matches} onNav={nav}/>;
     }
@@ -1282,19 +1341,21 @@ function App() {
     if(gameState){
       if(gameState.phase==='select'){setGameState(null);nav('dashboard');}
       else if(gameState.phase==='teams') setGameState({phase:'select',selectedIds:gameState.selectedIds});
-      else if(gameState.phase==='end') setGameState(prev=>({...prev,phase:'teams',split:prev.split}));
+      else if(gameState.phase==='pick-teams') setGameState(prev=>({...prev,phase:'teams'}));
+      else if(gameState.phase==='end') setGameState(prev=>({...prev,phase:(prev.numTeams||2)>2?'pick-teams':'teams'}));
+      else if(gameState.phase==='after-game') setGameState(prev=>({...prev,phase:'end'}));
     }else{
       const bm={'add-player':'players','edit-player':'player-detail','player-detail':'players','match-detail':'history'};
       nav(bm[screen]||'dashboard');
     }
   };
- 
+
   return (
     <div className="app">
       {loading&&<div className="loading-overlay"><div className="spinner"/><div className="loading-text">טוען...</div></div>}
       <header className="header">
         {showBack?<button className="header-back" onClick={handleBack}>← חזור</button>:<div className="header-logo" style={{cursor:'pointer'}} onClick={()=>nav('dashboard')}><span>⚽</span>{league.name}</div>}
-        {showBack&&<div style={{fontWeight:700,fontSize:15}}>{gameState?(gameState.phase==='select'?'בחר שחקנים':gameState.phase==='teams'?'חלוקת קבוצות':'תוצאה'):titles[screen]||''}</div>}
+        {showBack&&<div style={{fontWeight:700,fontSize:15}}>{gameState?(gameState.phase==='select'?'בחר שחקנים':gameState.phase==='teams'?'חלוקת קבוצות':gameState.phase==='pick-teams'?'בחר קבוצות':gameState.phase==='after-game'?'':' תוצאה'):titles[screen]||''}</div>}
         {!showBack&&<div style={{display:'flex',alignItems:'center',gap:8}}>
           <button className="btn btn-sm btn-primary" onClick={()=>nav('add-player')}>+ שחקן</button>
           <button className="btn btn-sm btn-ghost" onClick={handleLogout} style={{padding:'6px 10px'}} title="יציאה">🚪</button>
@@ -1313,7 +1374,7 @@ function App() {
     </div>
   );
 }
- 
+
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
