@@ -816,9 +816,13 @@ function NewGame({ players, onNext }) {
   const [selected,setSelected]=useState([]);
   const [numTeams,setNumTeams]=useState(2);
   const [mode,setMode]=useState('auto');
+  const [confirmAll,setConfirmAll]=useState(false);
   const allSelected=selected.length===players.length;
   const toggle=id=>setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
-  const toggleAll=()=>setSelected(allSelected?[]:players.map(p=>p.id));
+  const toggleAll=()=>{
+    if(!allSelected){setSelected(players.map(p=>p.id));setConfirmAll(true);}
+    else setSelected([]);
+  };
   const canDivide=selected.length>=numTeams;
   return (
     <div className="page fade-in">
@@ -851,6 +855,17 @@ function NewGame({ players, onNext }) {
         </button>
         <span style={{fontSize:18,fontWeight:900,color:canDivide?'var(--green)':'var(--text3)'}}>{selected.length} נבחרו</span>
       </div>
+      {confirmAll&&(
+        <div style={{background:'var(--card2)',border:'1px solid var(--green)44',borderRadius:12,padding:'14px 16px',marginBottom:12}}>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>כל השחקנים נבחרו — להתחיל משחק?</div>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn btn-primary btn-lg" style={{flex:1}} onClick={()=>{setConfirmAll(false);onNext(selected,numTeams,mode);}}>
+              {mode==='manual'?'שיוך ידני':'חלק'} ל-{numTeams} קבוצות
+            </button>
+            <button className="btn btn-ghost" onClick={()=>setConfirmAll(false)}>ביטול</button>
+          </div>
+        </div>
+      )}
       <div style={{paddingBottom:80}}>
       {players.map(p=>(
         <div key={p.id} className={`player-select-item ${selected.includes(p.id)?'selected':''}`} onClick={()=>toggle(p.id)}>
